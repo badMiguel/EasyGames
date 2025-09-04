@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+cd $HOME/documents/code/EasyGames
+
+tmux_running=$(pgrep tmux)
+
+if [[ -z tmux_running ]] || !(tmux has-session -t "EasyGames" 2> /dev/null); then
+    tmux new-session -d -s EasyGames -n Vim
+fi
+
+tmux send-keys -t EasyGames:0 'vim .' C-m
+
+tmux new-window -t EasyGames:1 -n Server
+tmux send-keys -t EasyGames:1 'cd EasyGames && dotnet watch run' C-m
+
+tmux new-window -t EasyGames:3 -n Terminal
+
+tmux select-window -t EasyGames:0
+tmux attach-session -t EasyGames
