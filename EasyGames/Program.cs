@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 string connectionString;
+
+// setup asked from AI
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
     connectionString = builder.Configuration.GetConnectionString("EasyGamesContext");
