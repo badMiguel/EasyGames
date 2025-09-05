@@ -1,4 +1,14 @@
+using System.Runtime.InteropServices;
+using EasyGames.Data;
+using EasyGames.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
 var builder = WebApplication.CreateBuilder(args);
+    connectionString = builder.Configuration.GetConnectionString("EasyGamesContext");
+    builder.Services.AddDbContext<EasyGamesContext>(options =>
+        options.UseSqlServer(connectionString)
+    );
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -20,10 +30,7 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();
