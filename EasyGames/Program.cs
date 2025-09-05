@@ -5,10 +5,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+string connectionString;
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+{
     connectionString = builder.Configuration.GetConnectionString("EasyGamesContext");
     builder.Services.AddDbContext<EasyGamesContext>(options =>
         options.UseSqlServer(connectionString)
     );
+}
+else
+{
+    connectionString = builder.Configuration.GetConnectionString("EasyGamesContextSqlite");
+    builder.Services.AddDbContext<EasyGamesContext>(options => options.UseSqlite(connectionString));
+}
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

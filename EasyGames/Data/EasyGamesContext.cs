@@ -16,4 +16,6 @@ public class EasyGamesContext : DbContext
         : base(options) { }
 
     public DbSet<EasyGames.Models.Item> Item { get; set; } = default!;
+
+    public DbSet<EasyGames.Models.Category> Category { get; set; } = default!;
 }
