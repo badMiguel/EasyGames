@@ -13,6 +13,9 @@ tmux send-keys -t EasyGames:0 'vim .' C-m
 tmux new-window -t EasyGames:1 -n Server
 tmux send-keys -t EasyGames:1 'cd EasyGames && dotnet watch run' C-m
 
+tmux new-window -t EasyGames:2 -n DB
+tmux send-keys -t EasyGames:2 'cd EasyGames && sqlite3 EasyGames.db' C-m
+
 tmux new-window -t EasyGames:3 -n Terminal
 
 tmux select-window -t EasyGames:0
