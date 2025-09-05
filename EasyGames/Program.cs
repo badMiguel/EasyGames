@@ -3,6 +3,7 @@ using EasyGames.Data;
 using EasyGames.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 string connectionString;
@@ -20,6 +21,8 @@ else
     connectionString = builder.Configuration.GetConnectionString("EasyGamesContextSqlite");
     builder.Services.AddDbContext<EasyGamesContext>(options => options.UseSqlite(connectionString));
 }
+
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<EasyGamesContext>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -41,6 +44,7 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
+app.MapRazorPages();
 app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
