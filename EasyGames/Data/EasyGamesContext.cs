@@ -18,4 +18,6 @@ public class EasyGamesContext : DbContext
     public DbSet<EasyGames.Models.Item> Item { get; set; } = default!;
 
     public DbSet<EasyGames.Models.Category> Category { get; set; } = default!;
+
+public DbSet<EasyGames.Models.ItemCategory> ItemCategory { get; set; } = default!;
 }
