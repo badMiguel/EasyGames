@@ -18,6 +18,8 @@ public class EasyGamesContext : IdentityDbContext<ApplicationUser>
     public DbSet<EasyGames.Models.Item> Item { get; set; } = default!;
     public DbSet<EasyGames.Models.Category> Category { get; set; } = default!;
     public DbSet<EasyGames.Models.ItemCategory> ItemCategory { get; set; } = default!;
+    public DbSet<EasyGames.Models.Review> Review { get; set; } = default!;
+    public DbSet<EasyGames.Models.UserItem> UserItem { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
