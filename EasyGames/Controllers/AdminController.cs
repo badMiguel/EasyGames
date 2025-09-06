@@ -25,76 +25,70 @@ public class AdminController : Controller
         return View(users);
     }
 
-    // GET: Category/Create
+    // GET: Admin/Create
     public IActionResult Create()
     {
         return View();
     }
 
-    // POST: Category/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("CategoryId,Name")] Category category)
-    {
-        if (ModelState.IsValid)
-        {
-            _context.Add(category);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-        return View(category);
-    }
+    // // POST: Admin/Create
+    // [HttpPost]
+    // [ValidateAntiForgeryToken]
+    // public async Task<IActionResult> Create([Bind("CategoryId,Name")] Category category)
+    // {
+    //     if (ModelState.IsValid)
+    //     {
+    //         _context.Add(category);
+    //         await _context.SaveChangesAsync();
+    //         return RedirectToAction(nameof(Index));
+    //     }
+    //     return View(category);
+    // }
 
-    // GET: Category/Edit/5
-    public async Task<IActionResult> Edit(int? id)
+    // GET: User/Edit/<user_id>
+    public async Task<IActionResult> Edit(string? id)
     {
         if (id == null)
         {
             return NotFound();
         }
 
-        var category = await _context.Category.FindAsync(id);
-        if (category == null)
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
         {
             return NotFound();
         }
-        return View(category);
+        return View(user);
     }
 
-    // POST: Category/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+    // GET: User/Edit/<user_id>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("CategoryId,Name")] Category category)
+    public async Task<IActionResult> Edit(
+        string id,
+        [Bind("Id,Email,UserName")] ApplicationUser user
+    )
     {
-        if (id != category.CategoryId)
+        var userToEdit = await _userManager.FindByIdAsync(id);
+        if (id != user.Id || userToEdit == null)
         {
             return NotFound();
         }
 
         if (ModelState.IsValid)
         {
-            try
+            userToEdit.Email = user.Email;
+            userToEdit.UserName = user.UserName;
+            var result = await _userManager.UpdateAsync(userToEdit);
+            if (!result.Succeeded)
             {
-                _context.Update(category);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CategoryExists(category.CategoryId))
+                foreach (var error in result.Errors)
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
             return RedirectToAction(nameof(Index));
         }
-        return View(category);
+        return View(user);
     }
 }
