@@ -4,7 +4,6 @@ using EasyGames.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc;
 
 namespace EasyGames.Controllers;
 
@@ -13,10 +12,15 @@ namespace EasyGames.Controllers;
 public class AdminController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
 
-    public AdminController(UserManager<ApplicationUser> userManager)
+    public AdminController(
+        UserManager<ApplicationUser> userManager,
+        RoleManager<IdentityRole> roleManager
+    )
     {
         _userManager = userManager;
+        _roleManager = roleManager;
     }
 
     public IActionResult Index()
@@ -31,19 +35,35 @@ public class AdminController : Controller
         return View();
     }
 
-    // // POST: Admin/Create
-    // [HttpPost]
-    // [ValidateAntiForgeryToken]
-    // public async Task<IActionResult> Create([Bind("CategoryId,Name")] Category category)
-    // {
-    //     if (ModelState.IsValid)
-    //     {
-    //         _context.Add(category);
-    //         await _context.SaveChangesAsync();
-    //         return RedirectToAction(nameof(Index));
-    //     }
-    //     return View(category);
-    // }
+    // POST: Admin/Create
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(
+        [Bind("UserName,Email,Password")] CreateUserModel userInput
+    )
+    {
+        if (!ModelState.IsValid)
+            return View();
+
+        var newUser = new ApplicationUser
+        {
+            UserName = userInput.UserName,
+            Email = userInput.Email,
+        };
+        var result = await _userManager.CreateAsync(newUser, userInput.Password);
+
+        if (result.Succeeded)
+        {
+            await _userManager.AddToRoleAsync(newUser, userInput.Role);
+            return RedirectToAction(nameof(Index));
+        }
+
+        foreach (var error in result.Errors)
+        {
+            ModelState.AddModelError(string.Empty, error.Description);
+        }
+        return View();
+    }
 
     // GET: User/Edit/<user_id>
     public async Task<IActionResult> Edit(string? id)

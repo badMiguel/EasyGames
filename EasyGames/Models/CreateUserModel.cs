@@ -1,0 +1,19 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace EasyGames.Models;
+
+// Only for creating a user as an admin user.
+public class CreateUserModel
+{
+    [Required]
+    public string? UserName { get; set; }
+
+    [Required, EmailAddress]
+    public string? Email { get; set; }
+
+    [Required, DataType(DataType.Password)]
+    public string? Password { get; set; }
+
+    public string Role { get; set; } = "User";
+}
+
