@@ -128,4 +128,43 @@ public class AdminController : Controller
         }
         return View(user);
     }
+
+    // GET: Category/Delete/5
+    public async Task<IActionResult> Delete(string? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
+        }
+
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        return View(user);
+    }
+
+    // POST: Category/Delete/5
+    [HttpPost, ActionName("Delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteConfirmed(string id)
+    {
+        var userToDelete = await _userManager.FindByIdAsync(id);
+        if (userToDelete == null)
+        {
+            return NotFound();
+        }
+
+        var result = await _userManager.DeleteAsync(userToDelete);
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+        }
+        return RedirectToAction(nameof(Index));
+    }
 }
