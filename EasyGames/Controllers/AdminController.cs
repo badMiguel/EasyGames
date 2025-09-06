@@ -29,6 +29,23 @@ public class AdminController : Controller
         return View(users);
     }
 
+    // GET: Admin/Details/<user_id>
+    public async Task<IActionResult> Details(string? id)
+    {
+        if (id == null)
+        {
+            return NotFound();
+        }
+
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        return View(user);
+    }
+
     // GET: Admin/Create
     public IActionResult Create()
     {
