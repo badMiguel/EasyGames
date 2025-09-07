@@ -1,8 +1,35 @@
-﻿@{
+﻿@model Dictionary<string, List<HomeItemCards>>
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h1 class="display-4 text-center">Easy Games</h1>
+
+@foreach(var keyVal in Model) 
+{
+    <div class="container pt-5">
+        <div class="d-flex">
+            <h2 class="flex-grow-1 mb-0">@keyVal.Key</h2>
+            <a class="nav-link text-dark d-flex align-items-end" asp-controller="Shop" asp-action="Toys">See more</a>
+        </div>
+        <hr>
+
+        <div class="row">
+            @foreach(var item in keyVal.Value) {
+            <div class="col-4">
+                <a class="text-decoration-none text-dark">
+                    <img src="~/images/image.jpg" class="img-fluid" alt="" />
+                    <h4>@item.Name</h4>
+                    <div class="d-flex gap-2">
+                        <p class="flex-grow-1">AU$@item.Price</p>
+                        <p class="material-icons text-warning">star</p>
+                        <p class="gap-1">@item.Rating</p>
+                        <p class="gap-1">(@item.RatingCount)</p>
+                    </div>
+                </a>
+            </div>
+            }
+        </div>
+    </div>
+}
