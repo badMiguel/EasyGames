@@ -1,0 +1,25 @@
+@model List<HomeItemCards>
+
+@{
+     ViewData["Title"] = "Shop";
+}
+
+<h2>@ViewData["Category"]</h2>
+
+<div class="d-flex flex-wrap justify-content-between">
+    @foreach (var item in Model) 
+    {
+        <div class="flex-fill" style="max-width: 25rem;">
+            <a class="text-decoration-none text-dark">
+                <img src="~/images/image.jpg" class="img-fluid" alt="" />
+                <h4>@item.Name</h4>
+                <div class="d-flex gap-2">
+                    <p class="flex-grow-1">AU$@item.Price</p>
+                    <p class="material-icons text-warning">star</p>
+                    <p class="gap-1">@item.Rating</p>
+                    <p class="gap-1">(@item.RatingCount)</p>
+                </div>
+            </a>
+        </div>
+    }
+</div>

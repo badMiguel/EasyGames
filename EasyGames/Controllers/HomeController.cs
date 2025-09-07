@@ -86,6 +86,50 @@ public class HomeController : Controller
         return (sumRating / reviews.Count, rateCounter);
     }
 
+    public IActionResult Category(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return RedirectToAction("Index");
+
+        var getItems = _context
+            .Category.Include(c => c.ItemCategories)
+            .ThenInclude(ic => ic.Item)
+            .FirstOrDefault(c => c.Name == name);
+
+        if (getItems == null) return RedirectToAction("CategoryNotFound");
+
+        ViewData["Category"] = name;
+        var items = getItems
+            .ItemCategories.Select(ic => ic.Item)
+            .ToList();
+
+        var itemList = new List<HomeItemCards>();
+
+        foreach (var item in items)
+        {
+            if (item == null) continue;
+
+
+            var rating = GetRating(item.ItemId);
+
+            itemList.Add(
+                new HomeItemCards
+                {
+                    Name = item.Name,
+                    Category = name,
+                    Price = item.Price,
+                    Rating = rating.AverageRating,
+                    RatingCount = rating.RatingCount,
+                }
+            );
+        }
+
+        return View(itemList);
+    }
+
+    public IActionResult CategoryNotFound(string name) {
+        return View();
+    }
+
     public IActionResult Privacy()
     {
         return View();
