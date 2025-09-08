@@ -20,7 +20,7 @@ public class Item
     public string? Description { get; set; }
     public int StockAmount { get; set; }
 
-    public ICollection<UserItem> UserItems { get; set; } = new List<UserItem>();
+    public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
     public ICollection<ItemCategory> ItemCategorys { get; set; } = new List<ItemCategory>();
 }

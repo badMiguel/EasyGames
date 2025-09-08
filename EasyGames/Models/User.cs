@@ -4,6 +4,6 @@ namespace EasyGames.Models;
 
 public class ApplicationUser : IdentityUser
 {
-    public ICollection<UserItem> UserItems {get; set;} = new List<UserItem>();
+    public ICollection<Order> Orders {get; set;} = new List<Order>();
     public ICollection<Review> Reviews {get; set;} = new List<Review>();
 }

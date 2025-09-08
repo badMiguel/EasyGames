@@ -9,7 +9,7 @@ namespace EasyGames.Models;
 
 public static class SeedData
 {
-    public static async void Initialize(IServiceProvider serviceProvider)
+    public static async Task Initialize(IServiceProvider serviceProvider)
     {
         using var context = new EasyGamesContext(
             serviceProvider.GetRequiredService<DbContextOptions<EasyGamesContext>>()

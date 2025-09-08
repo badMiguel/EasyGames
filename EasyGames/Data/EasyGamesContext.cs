@@ -6,7 +6,6 @@ using EasyGames.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 
 namespace EasyGames.Data;
 
@@ -19,7 +18,8 @@ public class EasyGamesContext : IdentityDbContext<ApplicationUser>
     public DbSet<EasyGames.Models.Category> Category { get; set; } = default!;
     public DbSet<EasyGames.Models.ItemCategory> ItemCategory { get; set; } = default!;
     public DbSet<EasyGames.Models.Review> Review { get; set; } = default!;
-    public DbSet<EasyGames.Models.UserItem> UserItem { get; set; } = default!;
+    public DbSet<EasyGames.Models.Order> Order { get; set; } = default!;
+    public DbSet<EasyGames.Models.OrderItem> OrderItem { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
