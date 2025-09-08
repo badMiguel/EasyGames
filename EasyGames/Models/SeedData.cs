@@ -106,7 +106,7 @@ public static class SeedData
                     },
                     new Item
                     {
-                        Name = "Harry Potter and the Sorcerer''s Stone",
+                        Name = "Harry Potter and the Sorcerer's Stone",
                         Price = 12.50m,
                         ProductionDate = new DateTime(2020, 2, 10),
                         Description = "Fantasy book by J.K. Rowling",

@@ -1,0 +1,66 @@
+@model EasyGames.Models.ItemDetails
+
+@{
+     ViewData["Title"] = "Shop";
+}
+
+<div class="d-flex gap-5">
+    <img src="~/images/image.jpg" class="img-fluid" style="max-width: 25rem;" alt="" />
+    <div>
+        <h1>@Model.Item.Name</h1>
+        <div class="d-flex justify-content-between align-items-center">
+            <p class="lh-1">AU$@Model.Item.Price</p>
+            <div class="d-flex gap-2">
+                <div class="d-flex">
+                    @for (int i = 0; i < 5; i++)
+                    {
+                        if (i < Model.Rating) 
+                        {
+                            if (Model.Rating < i + 0.5) 
+                            {
+                                <i class="fa-solid fa-star-half-stroke text-warning"></i>
+                            } else {
+                                <i class="fa-solid fa-star text-warning"></i>
+                            }
+                        } else {
+                            <i class="fa-regular fa-star text-secondary"></i>
+                        }
+                    }
+                </div>
+                <p class="lh-1">@Model.Rating</p>
+                <p class="lh-1">(@Model.RatingCount)</p>
+            </div>
+        </div>
+        <p>Production Date: @Model.Item.ProductionDate.ToString("yyyy-MM-dd")</p>
+        <p>Stock Left: @Model.Item.StockAmount</p>
+        <p>@Model.Item.Description</p>
+    </div>
+</div>
+
+<h3 class="mt-5">Reviews</h3>
+@foreach (var review in Model.Reviews) 
+{
+    <div class="mb-4">
+        <div class="d-flex gap-2">
+            <div> 
+                @for (int i = 0; i < 5; i++)
+                {
+                    if (i < review.StarRating) 
+                    {
+                        if (review.StarRating < i + 0.5) 
+                        {
+                            <i class="fa-solid fa-star-half-stroke text-warning"></i>
+                        } else {
+                            <i class="fa-solid fa-star text-warning"></i>
+                        }
+                    } else {
+                        <i class="fa-regular fa-star text-secondary"></i>
+                    }
+                }
+            </div>
+            <p class="mb-0">@review.StarRating</p>
+        </div>
+        <p class="mb-0">@review.Comment</p>
+        <p class="text-secondary fst-italic">- Reviewed by @Model.Reviewers[review.UserId]</p>
+    </div>
+}

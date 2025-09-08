@@ -18,7 +18,7 @@
         <div class="row">
             @foreach(var item in keyVal.Value) {
             <div class="col-4">
-                <a class="text-decoration-none text-dark">
+                <a class="text-decoration-none text-dark" asp-controller="Home" asp-action="ItemDetails"  asp-route-id="@item.ItemId">
                     <img src="~/images/image.jpg" class="img-fluid" alt="" />
                     <h4>@item.Name</h4>
                     <div class="d-flex gap-2">
