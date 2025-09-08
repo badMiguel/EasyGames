@@ -2,6 +2,7 @@ using EasyGames.Data;
 using EasyGames.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EasyGames.Controllers;
 
@@ -68,8 +69,6 @@ public class CartController : Controller
             }
         );
         await _context.SaveChangesAsync();
-
-        return RedirectToAction("ItemDetails", "Home", new { id = itemDetails.ItemId });
     }
 
     private async Task<decimal?> GetUnitPrice(int id)
@@ -98,5 +97,39 @@ public class CartController : Controller
         await _context.Order.AddAsync(newOrder);
         await _context.SaveChangesAsync();
         return newOrder.OrderId;
+    }
+
+    public async Task<IActionResult> BuyNow(ItemDetails itemDetails, int quantity)
+    {
+        var orderId = await GetUserOrderId();
+        var unitPrice = await GetUnitPrice(itemDetails.ItemId) ?? -1;
+        // price cannot be null, raise an error
+        if (unitPrice <= -1)
+        {
+            return RedirectToAction("Error", "Home");
+        }
+        await CreateOrderItem(itemDetails, quantity, orderId, unitPrice);
+        return RedirectToAction("ViewCart");
+    }
+
+    public async Task<IActionResult> ViewCart()
+    {
+        int orderId = await GetUserOrderId();
+        var orderItems = _context
+            .OrderItem.Include(oi => oi.Item)
+            .Where(oi => oi.OrderId == orderId)
+            .ToList();
+
+        return View(orderItems);
+    }
+
+    public IActionResult PlaceOrder()
+    {
+        return RedirectToAction("OrderSummary");
+    }
+
+    public IActionResult OrderSummary()
+    {
+        return View();
     }
 }

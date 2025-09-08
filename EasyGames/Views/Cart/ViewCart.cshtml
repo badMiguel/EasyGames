@@ -1,0 +1,12 @@
+@model IEnumerable<EasyGames.Models.OrderItem>
+
+@{
+     ViewData["Title"] = "Cart";
+}
+
+<h1 class="text-center">My Cart</h1>
+
+@foreach (var item in Model) {
+    <img src="~/images/image.jpg" class="img-fluid" alt="" />
+    <p>@item.Item.Name</p>
+}
