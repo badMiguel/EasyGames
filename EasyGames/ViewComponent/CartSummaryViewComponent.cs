@@ -24,8 +24,6 @@ public class CartSummaryViewComponent : ViewComponent
         var user = _httpContextAccessor.HttpContext?.User;
         var loggedInUserId = user?.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        Console.WriteLine(loggedInUserId);
-
         var order = _context.Order.FirstOrDefault(o =>
             o.Status == OrderStatus.InCart && o.UserId == loggedInUserId
         );

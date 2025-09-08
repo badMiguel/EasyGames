@@ -18,6 +18,12 @@ public class CartController : Controller
 
     public async Task<IActionResult> AddToCart(ItemDetails itemDetails, int quantity)
     {
+        var orderItemExists = await OrderItemExists(itemDetails, quantity);
+        if (orderItemExists)
+        {
+            return RedirectToAction("ItemDetails", "Home", new { id = itemDetails.ItemId });
+        }
+
         var orderId = await GetUserOrderId();
         var unitPrice = await GetUnitPrice(itemDetails.ItemId) ?? -1;
         // price cannot be null, raise an error
@@ -25,7 +31,33 @@ public class CartController : Controller
         {
             return RedirectToAction("Error", "Home");
         }
+        await CreateOrderItem(itemDetails, quantity, orderId, unitPrice);
+        return RedirectToAction("ItemDetails", "Home", new { id = itemDetails.ItemId });
+    }
 
+    private async Task<bool> OrderItemExists(ItemDetails itemDetails, int quantity)
+    {
+        var orderItem = await _context.OrderItem.FirstOrDefaultAsync(oi =>
+            oi.ItemId == itemDetails.ItemId
+        );
+
+        if (orderItem == null)
+        {
+            return false;
+        }
+
+        orderItem.Quantity += quantity;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    private async Task CreateOrderItem(
+        ItemDetails itemDetails,
+        int quantity,
+        int orderId,
+        decimal unitPrice
+    )
+    {
         await _context.OrderItem.AddAsync(
             new OrderItem
             {
