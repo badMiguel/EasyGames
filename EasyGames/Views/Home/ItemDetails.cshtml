@@ -4,7 +4,7 @@
      ViewData["Title"] = "Shop";
 }
 
-<div class="d-flex gap-5">
+<div class="d-flex gap-5 mb-5">
     <img src="~/images/image.jpg" class="img-fluid" style="width: 25rem;" alt="" />
     <div class="flex-grow-1">
         <h1>@Model.Item.Name</h1>
@@ -33,11 +33,25 @@
         </div>
         <p>Production Date: @Model.Item.ProductionDate.ToString("yyyy-MM-dd")</p>
         <p>Stock Left: @Model.Item.StockAmount</p>
-        <p>@Model.Item.Description</p>
+        <form asp-controller="Cart" method="POST" class="d-flex gap-3 mt-5">
+            <input type="hidden" asp-for="ItemId" />
+            <input type="hidden" asp-for="Item.Price" />
+
+            <div class="flex-grow-1">
+                <label for="quantity" class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1">
+            </div>
+
+            <input type="submit" value="Add To Cart" formaction="/Cart/AddToCart" class="btn btn-outline-primary btn-lg" />
+            <input type="submit" value="Buy Now" formaction="/Cart/BuyNow" class="btn btn-primary btn-lg" />
+        </form>
     </div>
 </div>
 
-<h3 class="mt-5">Reviews</h3>
+<h3 class="mb-5">Description</h3>
+<p>@Model.Item.Description</p>
+
+<h3 class="">Reviews</h3>
 @foreach (var review in Model.Reviews) 
 {
     <div class="mb-4">

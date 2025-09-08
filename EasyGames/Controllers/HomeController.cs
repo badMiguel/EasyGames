@@ -165,6 +165,7 @@ public class HomeController : Controller
 
         var details = new ItemDetails
         {
+            ItemId = item.ItemId,
             Item = item,
             Rating = rating.AverageRating,
             RatingCount = rating.RatingCount,
@@ -175,7 +176,9 @@ public class HomeController : Controller
         return View(details);
     }
 
-    private async Task<(List<Review>? Reviews, Dictionary<string, string>? Reviewers)> GetReviews(int itemId)
+    private async Task<(List<Review>? Reviews, Dictionary<string, string>? Reviewers)> GetReviews(
+        int itemId
+    )
     {
         var reviews = _context.Review.Where(r => r.ItemId == itemId).ToList();
         if (reviews == null)
@@ -196,6 +199,7 @@ public class HomeController : Controller
 
         return (reviews, reviewers);
     }
+
 
     public IActionResult Privacy()
     {
