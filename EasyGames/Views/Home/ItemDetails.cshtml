@@ -132,7 +132,7 @@
 }
 else
 {
-    <p class="fst-italic mt-3">
+    <p class="fst-italic mt-5">
         Please 
         <a asp-area="Identity" asp-page="/Account/Login" class="text-dark">log in</a>
         to leave a review.
@@ -172,4 +172,9 @@ else
             </div>
         }   
     </div>
+}
+
+@if (Model.Reviews.Count() <= 0) 
+{
+    <p>There are currently no reviews yet for this item</p>
 }
