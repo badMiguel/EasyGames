@@ -1,9 +1,9 @@
 using EasyGames.Data;
 using EasyGames.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 
 namespace EasyGames.Controllers;
 
@@ -42,13 +42,11 @@ public class CartController : Controller
     {
         var orderItem = await _context
             .OrderItem.Include(oi => oi.Order)
-            .FirstOrDefaultAsync(oi => oi.ItemId == itemDetails.ItemId);
+            .FirstOrDefaultAsync(oi =>
+                oi.ItemId == itemDetails.ItemId && oi.Order.Status == OrderStatus.InCart
+            );
 
-        if (
-            orderItem == null
-            || orderItem.Order == null
-            || orderItem.Order.Status == OrderStatus.Ordered
-        )
+        if (orderItem == null)
         {
             return false;
         }
