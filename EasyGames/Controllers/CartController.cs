@@ -3,9 +3,11 @@ using EasyGames.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EasyGames.Controllers;
 
+[Authorize]
 public class CartController : Controller
 {
     private readonly EasyGamesContext _context;

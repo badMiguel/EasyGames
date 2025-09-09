@@ -8,9 +8,11 @@ using EasyGames.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EasyGames.Controllers
 {
+    [Authorize]
     public class CategoryController : Controller
     {
         private readonly EasyGamesContext _context;
