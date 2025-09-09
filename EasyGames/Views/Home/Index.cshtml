@@ -26,7 +26,7 @@
                         @if (@item.RatingCount > 0) 
                         {
                             <i class="fa-solid fa-star text-warning"></i>
-                            <p class="gap-1 lh-1">@item.Rating</p>
+                            <p class="gap-1 lh-1">@item.Rating.ToString("0.00")</p>
                             <p class="gap-1 lh-1">(@item.RatingCount)</p>
                         }
                     </div>

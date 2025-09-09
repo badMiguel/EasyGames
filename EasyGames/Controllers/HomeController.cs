@@ -81,7 +81,7 @@ public class HomeController : Controller
         itemCards[category] = itemList;
     }
 
-    private (int AverageRating, int RatingCount) GetRating(int itemId)
+    private (double AverageRating, int RatingCount) GetRating(int itemId)
     {
         var reviews = _context.Review.Where(r => r.ItemId == itemId).ToList();
         if (reviews.Count() <= 0)
@@ -95,7 +95,8 @@ public class HomeController : Controller
             sumRating += review.StarRating;
             rateCounter++;
         }
-        return (sumRating / reviews.Count, rateCounter);
+
+        return ((double)sumRating / reviews.Count, rateCounter);
     }
 
     public IActionResult Category(string name)

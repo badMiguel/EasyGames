@@ -29,7 +29,7 @@
                         }
                     }
                 </div>
-                <p class="lh-1">@Model.Rating</p>
+                <p class="lh-1">@Model.Rating.ToString("0.00")</p>
                 <p class="lh-1">(@Model.RatingCount)</p>
             </div>
         </div>
@@ -132,7 +132,7 @@
 }
 else
 {
-    <p class="fst-italic mt-5">
+    <p class="fst-italic mt-3">
         Please 
         <a asp-area="Identity" asp-page="/Account/Login" class="text-dark">log in</a>
         to leave a review.
