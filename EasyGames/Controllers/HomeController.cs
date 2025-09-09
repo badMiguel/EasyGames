@@ -84,7 +84,7 @@ public class HomeController : Controller
     private (int AverageRating, int RatingCount) GetRating(int itemId)
     {
         var reviews = _context.Review.Where(r => r.ItemId == itemId).ToList();
-        if (reviews == null)
+        if (reviews.Count() <= 0)
         {
             return (0, 0);
         }

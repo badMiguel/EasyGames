@@ -1,7 +1,9 @@
 @model EasyGames.Models.ItemDetails
+@using System.Security.Claims
 
 @{
-     ViewData["Title"] = "Shop";
+    ViewData["Title"] = "Shop";
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
 
 <div class="d-flex gap-5 mb-5">
@@ -163,5 +165,11 @@ else
         </div>
         <p class="mb-0">@review.Comment</p>
         <p class="text-secondary fst-italic">- Reviewed by @Model.Reviewers[review.UserId]</p>
+        @if (review.UserId == currentUserId) 
+        {
+            <div class="d-flex gap-3">
+                <a asp-controller="Review" asp-action="Delete" asp-route-reviewId="@review.ReviewId" asp-route-itemId="@Model.ItemId" class="text-decoration-none text-secondary">Delete</a> 
+            </div>
+        }   
     </div>
 }

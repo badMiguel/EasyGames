@@ -18,7 +18,6 @@ public class ReviewController : Controller
         _userManager = userManager;
     }
 
-    // USED AI TO HELP WITH CODE
     public async Task<IActionResult> Add(int ItemId, int StarRating, string? Comment)
     {
         var user = await _userManager.GetUserAsync(User);
@@ -40,5 +39,20 @@ public class ReviewController : Controller
         await _context.SaveChangesAsync();
 
         return RedirectToAction("ItemDetails", "Home", new { id = ItemId });
+    }
+
+    public async Task<IActionResult> Delete(int reviewId, int itemId)
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+        var review = await _context.Review.FindAsync(reviewId);
+        if (review != null)
+        {
+            if (review.UserId == currentUser?.Id)
+            {
+                _context.Review.Remove(review);
+                await _context.SaveChangesAsync();
+            }
+        }
+        return RedirectToAction("ItemDetails", "Home", new { id = itemId });
     }
 }
