@@ -4,9 +4,48 @@
      ViewData["Title"] = "Cart";
 }
 
-<h1 class="text-center">My Cart</h1>
+<h1 class="text-center mb-5">My Cart</h1>
 
+<div class="row">
+    <p class="col-7 mb-0">Items</p>
+    <p class="col-2 mb-0">Quantity</p>
+    <p class="col-2 mb-0 text-end">Subtotal</p>
+</div>
+<hr>
 @foreach (var item in Model) {
-    <img src="~/images/image.jpg" class="img-fluid" alt="" />
-    <p>@item.Item.Name</p>
+    <div class="row align-items-center mb-5">
+        <div class="col-2">
+            <img src="~/images/image.jpg" class="img-fluid rounded" alt="" />
+        </div>
+        <div class="col-5">
+            <a class="text-decoration-none text-dark" asp-controller="Home" asp-action="ItemDetails"  asp-route-id="@item.ItemId">
+            <p>
+                @(item.Item.ItemCategorys?.Any() == true
+                ? string.Join(", ", item.Item.ItemCategorys
+                    .Select(ic => ic.Category?.Name ?? ""))
+                : "")
+            </p>
+            <h3>@item.Item.Name</h3>
+            <p>AU$@item.UnitPrice</p>
+            </a>
+        </div>
+        <div class="col-2">
+            <form asp-controller="" method="POST" class="">
+                <input type="hidden" name="OrderItemId" value="@item.OrderItemId" />
+                <div class="flex-grow-1 mb-2">
+                    <input type="number" class="form-control" name="quantity" value="@item.Quantity" min="1">
+                </div>
+                <input type="submit" value="Change" formaction="/Cart/ChangeQuantity" class="btn btn-primary btn-sm" />
+            </form>
+        </div>
+        <p class="col-2 text-end">AU$@( item.UnitPrice * item.Quantity)</p>
+        <div class="col-1">
+            <form asp-controller="Cart" asp-action="RemoveItem" method="post" class="text-center">
+                <input type="hidden" name="orderItemId" value="@item.OrderItemId" />
+                <button type="submit" class="btn btn-link p-0 text-danger border-0 shadow-none">
+                    <i class="fa-solid fa-xmark pb-3"></i>
+                </button>
+            </form>
+        </div>
+    </div>
 }

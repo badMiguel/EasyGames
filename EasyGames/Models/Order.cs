@@ -4,7 +4,7 @@ public enum OrderStatus
 {
     InCart = 0,
     Ordered = 1,
-    Cancelled = 2,
+    // Cancelled = 2,
 }
 
 public class Order

@@ -123,10 +123,38 @@ public class CartController : Controller
         int orderId = await GetUserOrderId();
         var orderItems = _context
             .OrderItem.Include(oi => oi.Item)
+            .ThenInclude(i => i.ItemCategorys)
+            .ThenInclude(ic => ic.Category)
             .Where(oi => oi.OrderId == orderId)
             .ToList();
 
         return View(orderItems);
+    }
+
+    public async Task<IActionResult> ChangeQuantity(OrderItem formOrderItem)
+    {
+        var orderItem = await _context.OrderItem.FindAsync(formOrderItem.OrderItemId);
+
+        if (orderItem != null)
+        {
+            orderItem.Quantity = formOrderItem.Quantity;
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToAction("ViewCart");
+    }
+
+    public async Task<IActionResult> RemoveItem(int orderItemId)
+    {
+        var orderItem = await _context.OrderItem.FindAsync(orderItemId);
+
+        if (orderItem != null)
+        {
+            _context.OrderItem.Remove(orderItem);
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToAction("ViewCart");
     }
 
     public IActionResult PlaceOrder()
