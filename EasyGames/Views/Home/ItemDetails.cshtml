@@ -33,18 +33,30 @@
         </div>
         <p>Production Date: @Model.Item.ProductionDate.ToString("yyyy-MM-dd")</p>
         <p>Stock Left: @Model.Item.StockAmount</p>
-        <form asp-controller="Cart" method="POST" class="d-flex gap-3 mt-5">
-            <input type="hidden" asp-for="ItemId" />
-            <input type="hidden" asp-for="Item.Price" />
+        @{
+        if (User.Identity?.IsAuthenticated ?? false) {
+            <form asp-controller="Cart" method="POST" class="d-flex gap-3 mt-5">
+                <input type="hidden" asp-for="ItemId" />
+                <input type="hidden" asp-for="Item.Price" />
 
-            <div class="flex-grow-1">
-                <label for="quantity" class="form-label">Quantity</label>
-                <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1">
-            </div>
+                <div class="flex-grow-1">
+                    <label for="quantity" class="form-label">Quantity</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1">
+                </div>
 
-            <input type="submit" value="Add To Cart" formaction="/Cart/AddToCart" class="btn btn-outline-primary btn-lg" />
-            <input type="submit" value="Buy Now" formaction="/Cart/BuyNow" class="btn btn-primary btn-lg" />
-        </form>
+                <input type="submit" value="Add To Cart" formaction="/Cart/AddToCart" class="btn btn-outline-primary btn-lg" />
+                <input type="submit" value="Buy Now" formaction="/Cart/BuyNow" class="btn btn-primary btn-lg" />
+            </form>
+        } 
+        else
+        {
+            <p class="fst-italic">
+                Please 
+                <a asp-area="Identity" asp-page="/Account/Register" class="text-dark">login</a>
+                to start buying items.
+            </p>
+        }
+        }
     </div>
 </div>
 
