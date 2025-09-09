@@ -71,7 +71,74 @@
 <h3 class="mb-5">Description</h3>
 <p>@Model.Item.Description</p>
 
-<h3 class="">Reviews</h3>
+
+<!-- UI FOR LEAVE A REVIEW PART IS GENERATED WITH AI ASSISTANCE--> 
+@if (User.Identity?.IsAuthenticated ?? false)
+{
+    if (!(ViewData["UserReviewed"] as bool? ?? false))
+    {
+        <h4 class="mt-5">Leave a Review</h4>
+        <form asp-controller="Review" asp-action="Add" method="post" class="mt-3">
+            <input type="hidden" asp-for="Item.ItemId" name="ItemId" />
+
+            <!-- Star Rating -->
+            <div class="mb-3">
+                <label class="form-label d-block">Rating</label>
+                <div class="star-rating" style="font-size: 1.5rem; cursor: pointer;">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <i class="fa-regular fa-star text-secondary" 
+                           data-value="@i"></i>
+                    }
+                </div>
+                <input type="hidden" id="starRating" name="StarRating" required />
+            </div>
+
+            <!-- Review Comment -->
+            <div class="mb-3">
+                <label for="comment" class="form-label">Your Review</label>
+                <textarea class="form-control" id="comment" name="Comment" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit Review</button>
+        </form>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const stars = document.querySelectorAll(".star-rating i");
+                const ratingInput = document.getElementById("starRating");
+
+                stars.forEach(star => {
+                    star.addEventListener("click", function () {
+                        const rating = this.getAttribute("data-value");
+                        ratingInput.value = rating;
+
+                        // Reset all stars
+                        stars.forEach(s => s.classList.remove("fa-solid", "text-warning"));
+                        stars.forEach(s => s.classList.add("fa-regular", "text-secondary"));
+
+                        // Highlight selected stars
+                        for (let i = 0; i < rating; i++) {
+                            stars[i].classList.remove("fa-regular", "text-secondary");
+                            stars[i].classList.add("fa-solid", "text-warning");
+                        }
+                    });
+                });
+            });
+        </script>
+    }
+}
+else
+{
+    <p class="fst-italic mt-3">
+        Please 
+        <a asp-area="Identity" asp-page="/Account/Login" class="text-dark">log in</a>
+        to leave a review.
+    </p>
+}
+
+
+<h3 class="mt-5">Reviews</h3>
 @foreach (var review in Model.Reviews) 
 {
     <div class="mb-4">

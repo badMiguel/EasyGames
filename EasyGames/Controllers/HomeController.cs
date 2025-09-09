@@ -163,6 +163,16 @@ public class HomeController : Controller
         var rating = GetRating(id);
         var reviews = await GetReviews(item.ItemId);
 
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (reviews.Reviews != null && currentUser != null)
+        {
+            bool exists = reviews.Reviews.Any(r => r.UserId == currentUser.Id);
+            if (exists)
+            {
+                ViewData["UserReviewed"] = true;
+            }
+        }
+
         var details = new ItemDetails
         {
             ItemId = item.ItemId,
@@ -199,7 +209,6 @@ public class HomeController : Controller
 
         return (reviews, reviewers);
     }
-
 
     public IActionResult Privacy()
     {
