@@ -101,6 +101,12 @@ public class CartController : Controller
 
     public async Task<IActionResult> BuyNow(ItemDetails itemDetails, int quantity)
     {
+        var orderItemExists = await OrderItemExists(itemDetails, quantity);
+        if (orderItemExists)
+        {
+            return RedirectToAction("ViewCart", "Cart", new { id = itemDetails.ItemId });
+        }
+
         var orderId = await GetUserOrderId();
         var unitPrice = await GetUnitPrice(itemDetails.ItemId) ?? -1;
         // price cannot be null, raise an error
