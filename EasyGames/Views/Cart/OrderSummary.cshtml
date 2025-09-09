@@ -1,0 +1,42 @@
+@model IEnumerable<EasyGames.Models.OrderItem>
+
+@{
+    ViewData["Title"] = "Summary";
+    var totalPrice = 0m;
+}
+
+<div class="d-flex justify-content-center align-items-center flex-column gap-3 mt-5">
+    <i class="fa-solid fa-circle-check" style="color: #63E6BE; font-size: 5rem;"></i>
+    <h1>Thank You For you Purchase!</h1>
+    <p>Your order number is #@ViewData["OrderId"]</p>
+</div>
+<div class="container" style="max-width: 800px;">
+    @foreach(var item in Model) 
+    {
+        <div class="row mb-4 align-items-center">
+            <div class="col-3">
+                <img src="~/images/image.jpg" class="img-fluid rounded " alt="" />
+            </div>
+            <div class="col-6">
+                <p>
+                    @(item.Item.ItemCategorys?.Any() == true
+                    ? string.Join(", ", item.Item.ItemCategorys
+                    .Select(ic => ic.Category?.Name ?? ""))
+                    : "")
+                </p>
+                <h4 class="">@item.Item.Name</h4>
+            </div>
+            <div class="col-3">
+                @{totalPrice += item.UnitPrice * item.Quantity;}
+                <p class="fw-bold text-end mb-0">AU$@( item.UnitPrice * item.Quantity )</p>
+                <p class="text-secondary text-end">Qty: @item.Quantity</p>
+            </div>
+        </div>
+    }
+    <hr>
+    <div class="row">
+        <div class="col-3"></div>
+        <p class="fw-bold  col-6">Total</p>
+        <p class="col-3 text-end fw-bold ">AU$@totalPrice</p>
+    </div>
+</div>

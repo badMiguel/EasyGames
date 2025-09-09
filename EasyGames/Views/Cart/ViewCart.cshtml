@@ -1,19 +1,28 @@
 @model IEnumerable<EasyGames.Models.OrderItem>
 
 @{
-     ViewData["Title"] = "Cart";
+    ViewData["Title"] = "Cart";
+    var totalPrice = 0m;
 }
 
 <h1 class="text-center mb-5">My Cart</h1>
+
+@{
+    if (Model.Count() <= 0) 
+    {
+        <p class="fs-5 text-center">There are no items in your cart.</p>
+        return;
+    }
+}
 
 <div class="row">
     <p class="col-7 mb-0">Items</p>
     <p class="col-2 mb-0">Quantity</p>
     <p class="col-2 mb-0 text-end">Subtotal</p>
 </div>
-<hr>
+<hr class="mb-5">
 @foreach (var item in Model) {
-    <div class="row align-items-center mb-5">
+    <div class="row align-items-center">
         <div class="col-2">
             <img src="~/images/image.jpg" class="img-fluid rounded" alt="" />
         </div>
@@ -38,6 +47,7 @@
                 <input type="submit" value="Change" formaction="/Cart/ChangeQuantity" class="btn btn-primary btn-sm" />
             </form>
         </div>
+        @{totalPrice += item.UnitPrice * item.Quantity;}
         <p class="col-2 text-end">AU$@( item.UnitPrice * item.Quantity)</p>
         <div class="col-1">
             <form asp-controller="Cart" asp-action="RemoveItem" method="post" class="text-center">
@@ -48,4 +58,21 @@
             </form>
         </div>
     </div>
+    <hr class="mb-5 mt-5">
 }
+
+<div class="row">
+    <div class="col-2"></div>
+    <p class="fw-bold fs-5 col-7">Total</p>
+    <p class="col-2 text-end fw-bold fs-5">AU$@totalPrice</p>
+</div>
+
+<div class="row">
+    <div class="col-9"></div>
+    <form asp-controller="Cart" asp-action="PlaceOrder" method="post" class="col-2 text-end">
+        <input type="hidden" name="orderId" value="@ViewData["OrderId"]" />
+        <button type="submit" class="btn btn-primary ps-4 pe-4 shadow-none">
+            Place Order
+        </button>
+    </form>
+</div>

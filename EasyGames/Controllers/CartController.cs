@@ -38,11 +38,15 @@ public class CartController : Controller
 
     private async Task<bool> OrderItemExists(ItemDetails itemDetails, int quantity)
     {
-        var orderItem = await _context.OrderItem.FirstOrDefaultAsync(oi =>
-            oi.ItemId == itemDetails.ItemId
-        );
+        var orderItem = await _context
+            .OrderItem.Include(oi => oi.Order)
+            .FirstOrDefaultAsync(oi => oi.ItemId == itemDetails.ItemId);
 
-        if (orderItem == null)
+        if (
+            orderItem == null
+            || orderItem.Order == null
+            || orderItem.Order.Status == OrderStatus.Ordered
+        )
         {
             return false;
         }
@@ -85,7 +89,7 @@ public class CartController : Controller
     {
         var loggedInUserId = _userManager.GetUserId(User);
         var order = _context.Order.FirstOrDefault(o =>
-            o.Status == OrderStatus.InCart || o.UserId == loggedInUserId
+            o.Status == OrderStatus.InCart && o.UserId == loggedInUserId
         );
 
         if (order != null)
@@ -120,15 +124,27 @@ public class CartController : Controller
 
     public async Task<IActionResult> ViewCart()
     {
+        bool isLoggedIn = User.Identity.IsAuthenticated;
+
+        if (!isLoggedIn)
+        {
+            return RedirectToPage("/Account/Login", new { area = "Identity" });
+        }
+
         int orderId = await GetUserOrderId();
-        var orderItems = _context
+        var orderItems = GetOrderedItems(orderId);
+        ViewData["OrderId"] = orderId;
+        return View(orderItems);
+    }
+
+    private List<OrderItem> GetOrderedItems(int orderId)
+    {
+        return _context
             .OrderItem.Include(oi => oi.Item)
             .ThenInclude(i => i.ItemCategorys)
             .ThenInclude(ic => ic.Category)
             .Where(oi => oi.OrderId == orderId)
             .ToList();
-
-        return View(orderItems);
     }
 
     public async Task<IActionResult> ChangeQuantity(OrderItem formOrderItem)
@@ -157,13 +173,33 @@ public class CartController : Controller
         return RedirectToAction("ViewCart");
     }
 
-    public IActionResult PlaceOrder()
+    public async Task<IActionResult> PlaceOrder(int orderId)
     {
-        return RedirectToAction("OrderSummary");
+        var order = await _context.Order.FindAsync(orderId);
+
+        if (order != null)
+        {
+            order.Status = OrderStatus.Ordered;
+            order.OrderDate = DateTime.UtcNow.Date;
+            await _context.SaveChangesAsync();
+
+            TempData["OrderId"] = orderId;
+            return RedirectToAction("OrderSummary");
+        }
+
+        return RedirectToAction("ViewCart");
     }
 
     public IActionResult OrderSummary()
     {
-        return View();
+        var orderId = TempData["OrderId"] as int? ?? -1;
+        if (orderId <= -1)
+        {
+            return RedirectToAction("ViewCart");
+        }
+
+        var orderedItems = GetOrderedItems(orderId);
+        ViewData["OrderId"] = orderId;
+        return View(orderedItems);
     }
 }
