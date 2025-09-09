@@ -42,7 +42,7 @@
             <form asp-controller="" method="POST" class="">
                 <input type="hidden" name="OrderItemId" value="@item.OrderItemId" />
                 <div class="flex-grow-1 mb-2">
-                    <input type="number" class="form-control" name="quantity" value="@item.Quantity" min="1">
+                    <input type="number" class="form-control" name="quantity" value="@item.Quantity" min="1" max="@item.Item.StockAmount">
                 </div>
                 <input type="submit" value="Change" formaction="/Cart/ChangeQuantity" class="btn btn-primary btn-sm" />
             </form>

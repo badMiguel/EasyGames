@@ -42,6 +42,7 @@ public class CartController : Controller
     {
         var orderItem = await _context
             .OrderItem.Include(oi => oi.Order)
+            .Include(oi => oi.Item)
             .FirstOrDefaultAsync(oi =>
                 oi.ItemId == itemDetails.ItemId && oi.Order.Status == OrderStatus.InCart
             );
@@ -51,7 +52,16 @@ public class CartController : Controller
             return false;
         }
 
-        orderItem.Quantity += quantity;
+        var newQuantity = orderItem.Quantity + quantity;
+        if (newQuantity <= orderItem.Item.StockAmount)
+        {
+            orderItem.Quantity = newQuantity;
+        }
+        else
+        {
+            orderItem.Quantity = orderItem.Item.StockAmount;
+        }
+
         await _context.SaveChangesAsync();
         return true;
     }
@@ -183,11 +193,26 @@ public class CartController : Controller
             order.OrderDate = DateTime.UtcNow.Date;
             await _context.SaveChangesAsync();
 
+            await DecrementStockAmount(orderId);
+
             TempData["OrderId"] = orderId;
             return RedirectToAction("OrderSummary");
         }
 
         return RedirectToAction("ViewCart");
+    }
+
+    private async Task DecrementStockAmount(int orderId)
+    {
+        var orderItems = GetOrderedItems(orderId);
+        if (orderItems != null)
+        {
+            foreach (var orderItem in orderItems)
+            {
+                orderItem.Item.StockAmount -= orderItem.Quantity;
+            }
+            await _context.SaveChangesAsync();
+        }
     }
 
     public IActionResult OrderSummary()
