@@ -44,8 +44,16 @@
                     <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="@Model.Item.StockAmount">
                 </div>
 
-                <input type="submit" value="Add To Cart" formaction="/Cart/AddToCart" class="btn btn-outline-primary btn-lg" />
-                <input type="submit" value="Buy Now" formaction="/Cart/BuyNow" class="btn btn-primary btn-lg" />
+                @if (Model.Item.StockAmount < 1)
+                {   
+                    <input type="submit" value="Add To Cart" formaction="/Cart/AddToCart" class="disabled btn btn-outline-primary btn-lg" />
+                    <input type="submit" value="Buy Now" formaction="/Cart/BuyNow" class="disabled btn btn-primary btn-lg" />
+                }
+                else 
+                {
+                    <input type="submit" value="Add To Cart" formaction="/Cart/AddToCart" class="btn btn-outline-primary btn-lg" />
+                    <input type="submit" value="Buy Now" formaction="/Cart/BuyNow" class="btn btn-primary btn-lg" />
+                }
             </form>
         } 
         else
