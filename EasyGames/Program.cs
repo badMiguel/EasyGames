@@ -56,7 +56,7 @@ app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Inde
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    SeedData.Initialize(services);
+    await SeedData.Initialize(services);
 }
 
 app.Run();
