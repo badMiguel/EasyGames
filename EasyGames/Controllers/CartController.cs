@@ -40,11 +40,14 @@ public class CartController : Controller
 
     private async Task<bool> OrderItemExists(ItemDetails itemDetails, int quantity)
     {
+        var loggedInUserId = _userManager.GetUserId(User);
         var orderItem = await _context
             .OrderItem.Include(oi => oi.Order)
             .Include(oi => oi.Item)
             .FirstOrDefaultAsync(oi =>
-                oi.ItemId == itemDetails.ItemId && oi.Order.Status == OrderStatus.InCart
+                oi.ItemId == itemDetails.ItemId
+                && oi.Order.Status == OrderStatus.InCart
+                && oi.Order.UserId == loggedInUserId
             );
 
         if (orderItem == null)
