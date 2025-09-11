@@ -6,10 +6,10 @@
 
 <h2>@ViewData["Category"]</h2>
 
-<div class="d-flex flex-wrap justify-content-between">
+<div class="row">
     @foreach (var item in Model) 
     {
-        <div class="flex-fill" style="max-width: 25rem;">
+        <div class="col-4" style="">
             <a class="text-decoration-none text-dark" asp-controller="Home" asp-action="ItemDetails"  asp-route-id="@item.ItemId">
                 <img src="~/images/image.jpg" class="img-fluid" alt="" />
                 <h4>@item.Name</h4>
