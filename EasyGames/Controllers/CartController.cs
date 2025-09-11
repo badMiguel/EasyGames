@@ -137,7 +137,7 @@ public class CartController : Controller
 
     public async Task<IActionResult> ViewCart()
     {
-        bool isLoggedIn = User.Identity.IsAuthenticated;
+        bool isLoggedIn = User.Identity?.IsAuthenticated ?? false;
 
         if (!isLoggedIn)
         {
@@ -147,6 +147,7 @@ public class CartController : Controller
         int orderId = await GetUserOrderId();
         var orderItems = GetOrderedItems(orderId);
         ViewData["OrderId"] = orderId;
+        ViewData["OrderItemError"] = TempData["OrderItemError"];
         return View(orderItems);
     }
 
@@ -186,10 +187,28 @@ public class CartController : Controller
         return RedirectToAction("ViewCart");
     }
 
+    private bool ValidateOrder(int orderId)
+    {
+        var orderItems = GetOrderedItems(orderId);
+        foreach (var orderItem in orderItems)
+        {
+            if (orderItem.Quantity > orderItem.Item?.StockAmount)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public async Task<IActionResult> PlaceOrder(int orderId)
     {
-        var order = await _context.Order.FindAsync(orderId);
+        if (!ValidateOrder(orderId))
+        {
+            TempData["OrderItemError"] = "Sorry there are not enough stock left for this item.";
+            return RedirectToAction("ViewCart");
+        }
 
+        var order = await _context.Order.FindAsync(orderId);
         if (order != null)
         {
             order.Status = OrderStatus.Ordered;
