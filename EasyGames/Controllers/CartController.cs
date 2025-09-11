@@ -19,6 +19,8 @@ public class CartController : Controller
         _userManager = userManager;
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddToCart(ItemDetails itemDetails, int quantity)
     {
         var orderItemExists = await OrderItemExists(itemDetails, quantity);
@@ -116,6 +118,8 @@ public class CartController : Controller
         return newOrder.OrderId;
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> BuyNow(ItemDetails itemDetails, int quantity)
     {
         var orderItemExists = await OrderItemExists(itemDetails, quantity);
@@ -161,6 +165,8 @@ public class CartController : Controller
             .ToList();
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeQuantity(OrderItem formOrderItem)
     {
         var orderItem = await _context.OrderItem.FindAsync(formOrderItem.OrderItemId);
@@ -174,6 +180,9 @@ public class CartController : Controller
         return RedirectToAction("ViewCart");
     }
 
+    
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveItem(int orderItemId)
     {
         var orderItem = await _context.OrderItem.FindAsync(orderItemId);
@@ -200,6 +209,8 @@ public class CartController : Controller
         return true;
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> PlaceOrder(int orderId)
     {
         if (!ValidateOrder(orderId))
