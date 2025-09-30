@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EasyGames.Controllers;
 
+// Test Micia
+
 // Used AI to assist
 [Authorize(Roles = "Admin")]
 public class AdminController : Controller
