@@ -2,6 +2,13 @@ using Microsoft.AspNetCore.Identity;
 
 namespace EasyGames.Models;
 
+public enum UserRoles
+{
+    Owner,
+    ShopProprietor,
+    Customer,
+}
+
 public class ApplicationUser : IdentityUser
 {
     public int AccountPoints { get; set; }
