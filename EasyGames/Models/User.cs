@@ -6,6 +6,9 @@ public class ApplicationUser : IdentityUser
 {
     public int AccountPoints { get; set; }
 
+    // Navigation to Shop Models (not an FK)
+    public Shop? Shop { get; set; }
+
     public ICollection<Order> Orders { get; set; } = new List<Order>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
@@ -16,10 +19,14 @@ public class ApplicationUser : IdentityUser
 
     public string AccountStatus
     {
-        get { 
-            if (AccountPoints >= PlatinumPoints) return "Platinum";
-            if (AccountPoints >= GoldPoints) return "Gold";
-            if (AccountPoints >= SilverPoints) return "Silver";
+        get
+        {
+            if (AccountPoints >= PlatinumPoints)
+                return "Platinum";
+            if (AccountPoints >= GoldPoints)
+                return "Gold";
+            if (AccountPoints >= SilverPoints)
+                return "Silver";
             return "Bronze";
         }
     }
