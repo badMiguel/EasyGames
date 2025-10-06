@@ -17,4 +17,6 @@ public class Shop
     // Foreign key User (ASP.Net Core Identity)
     public string? OwnerId { get; set; }
     public ApplicationUser? Owner { get; set; }
+
+    public ICollection<Order> Orders { get; set; } = new List<Order>();
 }
