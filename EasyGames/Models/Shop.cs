@@ -19,4 +19,6 @@ public class Shop
     public ApplicationUser? Owner { get; set; }
 
     public ICollection<Order> Orders { get; set; } = new List<Order>();
+
+    public InventoryLocation? Location { get; set; }
 }
