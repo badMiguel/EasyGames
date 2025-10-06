@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EasyGames.Models;
-//agnes test
+
 public class Item
 {
     public int ItemId { get; set; }
@@ -10,15 +11,23 @@ public class Item
     [Required]
     public string? Name { get; set; }
 
+    [Range(1, 100)]
     [DataType(DataType.Currency)]
-    public decimal Price { get; set; }
+    [Display(Name = "Buy Price")]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal BuyPrice { get; set; }
+
+    [Range(1, 100)]
+    [DataType(DataType.Currency)]
+    [Display(Name = "Sell Price")]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal SellPrice { get; set; }
 
     [Display(Name = "Production Date")]
     [DataType(DataType.Date)]
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
     public DateTime ProductionDate { get; set; }
     public string? Description { get; set; }
-    public int StockAmount { get; set; }
 
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
