@@ -12,6 +12,8 @@ public class ApplicationUser : IdentityUser
     public ICollection<Order> Orders { get; set; } = new List<Order>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
+    public Customer? Customer { get; set; }
+
     public const int BronzePoints = 500;
     public const int SilverPoints = 1_000;
     public const int GoldPoints = 5_000;
