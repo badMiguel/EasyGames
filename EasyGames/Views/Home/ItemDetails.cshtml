@@ -11,7 +11,7 @@
     <div class="flex-grow-1">
         <h1>@Model.Item.Name</h1>
         <div class="d-flex justify-content-between align-items-center">
-            <p class="lh-1">AU$@Model.Item.Price</p>
+            <p class="lh-1">AU$@Model.Item.SellPrice</p>
             <div class="d-flex gap-2">
                 <div class="d-flex">
                     @for (int i = 0; i < 5; i++)
@@ -34,19 +34,19 @@
             </div>
         </div>
         <p>Production Date: @Model.Item.ProductionDate.ToString("yyyy-MM-dd")</p>
-        <p>Stock Left: @Model.Item.StockAmount</p>
+        <p>Stock Left: @Model.Inventory.Quantity</p>
         @{
         if (User.Identity?.IsAuthenticated ?? false) {
             <form asp-controller="Cart" method="POST" class="d-flex gap-3 mt-5">
                 <input type="hidden" asp-for="ItemId" />
-                <input type="hidden" asp-for="Item.Price" />
+                <input type="hidden" asp-for="Item.SellPrice" />
 
                 <div class="flex-grow-1">
                     <label for="quantity" class="form-label">Quantity</label>
-                    <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="@Model.Item.StockAmount">
+                    <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="@Model.Inventory.Quantity">
                 </div>
 
-                @if (Model.Item.StockAmount < 1)
+                @if (Model.Inventory.Quantity < 1)
                 {   
                     <input type="submit" value="Add To Cart" formaction="/Cart/AddToCart" class="disabled btn btn-outline-primary btn-lg" />
                     <input type="submit" value="Buy Now" formaction="/Cart/BuyNow" class="disabled btn btn-primary btn-lg" />

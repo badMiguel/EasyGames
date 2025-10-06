@@ -40,16 +40,6 @@ public class CartController : Controller
         return RedirectToAction("ItemDetails", "Home", new { id = itemDetails.ItemId });
     }
 
-    private async Task<Inventory?> GetOnlineInventory(ItemDetails itemDetails)
-    {
-        return await _context
-            .Inventory.Include(i => i.Location)
-            .Include(i => i.Item)
-            .FirstOrDefaultAsync(i =>
-                i.Location!.LocationType == LocationTypes.Online && i.ItemId == itemDetails.ItemId
-            );
-    }
-
     private async Task<Shop?> GetOnlineShop()
     {
         return await _context
@@ -73,9 +63,8 @@ public class CartController : Controller
 
     private async Task<bool> OrderItemExists(ItemDetails itemDetails, int quantity)
     {
-        var inventory = await GetOnlineInventory(itemDetails);
         var customer = await GetCustomer();
-        if (inventory == null || customer == null)
+        if (customer == null)
         {
             return false;
         }
@@ -86,7 +75,7 @@ public class CartController : Controller
             .Include(oi => oi.Inventory)
             .ThenInclude(i => i.ItemId)
             .FirstOrDefaultAsync(oi =>
-                oi.Inventory.ItemId == inventory.InventoryId
+                oi.Inventory.ItemId == itemDetails.Inventory.ItemId
                 && oi.Order.Status == OrderStatus.InCart
                 && oi.Order.CustomerId == customer.CustomerId
             );
@@ -117,19 +106,11 @@ public class CartController : Controller
         decimal unitPrice
     )
     {
-        var inventory = await GetOnlineInventory(itemDetails);
-
-        if (inventory == null)
-        {
-            // TODO: add error handling, shouldnt be null
-            return;
-        }
-
         await _context.OrderItem.AddAsync(
             new OrderItem
             {
                 OrderId = orderId,
-                InventoryId = inventory.InventoryId,
+                InventoryId = itemDetails.InventoryId,
                 UnitPrice = unitPrice,
                 Quantity = quantity,
             }

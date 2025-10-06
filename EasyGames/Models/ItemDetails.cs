@@ -5,6 +5,9 @@ public class ItemDetails
     public int ItemId { get; set; }
     public Item? Item { get; set; }
 
+    public int InventoryId { get; set; }
+    public Inventory? Inventory { get; set; }
+
     public List<Review>? Reviews { get; set; }
     public Dictionary<string, string>? Reviewers { get; set; }
     public double Rating { get; set; } = 0;

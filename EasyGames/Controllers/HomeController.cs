@@ -174,10 +174,22 @@ public class HomeController : Controller
             }
         }
 
+        var inventory = await _context
+            .Inventory.Include(i => i.Location)
+            .Include(i => i.Item)
+            .FirstOrDefaultAsync(i =>
+                i.Location!.LocationType == LocationTypes.Online && i.ItemId == item.ItemId
+            );
+        if (inventory == null)
+        {
+            return NotFound();
+        }
+
         var details = new ItemDetails
         {
             ItemId = item.ItemId,
             Item = item,
+            Inventory = inventory,
             Rating = rating.AverageRating,
             RatingCount = rating.RatingCount,
             Reviews = reviews.Reviews,
