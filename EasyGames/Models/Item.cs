@@ -29,7 +29,7 @@ public class Item
     public DateTime ProductionDate { get; set; }
     public string? Description { get; set; }
 
-    public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+    public ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
     public ICollection<ItemCategory> ItemCategorys { get; set; } = new List<ItemCategory>();
 }

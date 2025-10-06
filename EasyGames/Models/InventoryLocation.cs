@@ -17,4 +17,6 @@ public class InventoryLocation
     // Foreign key
     public int ShopId { get; set; }
     public Shop? Shop { get; set; }
+
+    public ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
 }
