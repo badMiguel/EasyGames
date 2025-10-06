@@ -24,7 +24,9 @@ public class OrderItem
     [Column(TypeName = "decimal(18,2)")]
     public decimal UnitPrice { get; set; }
 
+    // Discount stored as decimal, to be converted to percent
     // Default no discount was used
-    [Column(TypeName = "decimal(5,2)")]
-    public decimal Discount { get; set; } = 0;
+    [Display(Name = "Discount")]
+    [Column(TypeName = "decimal(5,4)")]
+    public decimal DiscountPercent { get; set; } = 0.0000M;
 }
