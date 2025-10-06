@@ -40,16 +40,55 @@ public class CartController : Controller
         return RedirectToAction("ItemDetails", "Home", new { id = itemDetails.ItemId });
     }
 
-    private async Task<bool> OrderItemExists(ItemDetails itemDetails, int quantity)
+    private async Task<Inventory?> GetOnlineInventory(ItemDetails itemDetails)
+    {
+        return await _context
+            .Inventory.Include(i => i.Location)
+            .Include(i => i.Item)
+            .FirstOrDefaultAsync(i =>
+                i.Location!.LocationType == LocationTypes.Online && i.ItemId == itemDetails.ItemId
+            );
+    }
+
+    private async Task<Shop?> GetOnlineShop()
+    {
+        return await _context
+            .Shop.Include(s => s.Location)
+            .ThenInclude(l => l.Inventories)
+            .FirstOrDefaultAsync(s => s.Location.LocationType == LocationTypes.Online);
+    }
+
+    private async Task<Customer?> GetCustomer()
     {
         var loggedInUserId = _userManager.GetUserId(User);
+        if (loggedInUserId == null)
+        {
+            var getCustomer = await _context.Customer.FirstOrDefaultAsync(c =>
+                c.UserId == loggedInUserId
+            );
+            return getCustomer;
+        }
+        return null;
+    }
+
+    private async Task<bool> OrderItemExists(ItemDetails itemDetails, int quantity)
+    {
+        var inventory = await GetOnlineInventory(itemDetails);
+        var customer = await GetCustomer();
+        if (inventory == null || customer == null)
+        {
+            return false;
+        }
+
         var orderItem = await _context
             .OrderItem.Include(oi => oi.Order)
-            .Include(oi => oi.Item)
+            .ThenInclude(o => o.Customer)
+            .Include(oi => oi.Inventory)
+            .ThenInclude(i => i.ItemId)
             .FirstOrDefaultAsync(oi =>
-                oi.ItemId == itemDetails.ItemId
+                oi.Inventory.ItemId == inventory.InventoryId
                 && oi.Order.Status == OrderStatus.InCart
-                && oi.Order.UserId == loggedInUserId
+                && oi.Order.CustomerId == customer.CustomerId
             );
 
         if (orderItem == null)
@@ -58,13 +97,13 @@ public class CartController : Controller
         }
 
         var newQuantity = orderItem.Quantity + quantity;
-        if (newQuantity <= orderItem.Item.StockAmount)
+        if (newQuantity <= orderItem.Inventory.Quantity)
         {
             orderItem.Quantity = newQuantity;
         }
         else
         {
-            orderItem.Quantity = orderItem.Item.StockAmount;
+            orderItem.Quantity = orderItem.Inventory.Quantity;
         }
 
         await _context.SaveChangesAsync();
@@ -78,11 +117,19 @@ public class CartController : Controller
         decimal unitPrice
     )
     {
+        var inventory = await GetOnlineInventory(itemDetails);
+
+        if (inventory == null)
+        {
+            // TODO: add error handling, shouldnt be null
+            return;
+        }
+
         await _context.OrderItem.AddAsync(
             new OrderItem
             {
                 OrderId = orderId,
-                ItemId = itemDetails.ItemId,
+                InventoryId = inventory.InventoryId,
                 UnitPrice = unitPrice,
                 Quantity = quantity,
             }
@@ -97,14 +144,16 @@ public class CartController : Controller
         {
             return null;
         }
-        return item.Price;
+        return item.SellPrice;
     }
 
     private async Task<int> GetUserOrderId()
     {
-        var loggedInUserId = _userManager.GetUserId(User);
+        var customer = await GetCustomer();
+        var shop = await GetOnlineShop();
+
         var order = _context.Order.FirstOrDefault(o =>
-            o.Status == OrderStatus.InCart && o.UserId == loggedInUserId
+            o.Status == OrderStatus.InCart && o.CustomerId == customer.CustomerId
         );
 
         if (order != null)
@@ -112,7 +161,12 @@ public class CartController : Controller
             return order.OrderId;
         }
 
-        var newOrder = new Order { UserId = loggedInUserId, Status = OrderStatus.InCart };
+        var newOrder = new Order
+        {
+            CustomerId = customer.CustomerId,
+            ShopId = shop.ShopId,
+            Status = OrderStatus.InCart,
+        };
         await _context.Order.AddAsync(newOrder);
         await _context.SaveChangesAsync();
         return newOrder.OrderId;
@@ -158,9 +212,7 @@ public class CartController : Controller
     private List<OrderItem> GetOrderedItems(int orderId)
     {
         return _context
-            .OrderItem.Include(oi => oi.Item)
-            .ThenInclude(i => i.ItemCategorys)
-            .ThenInclude(ic => ic.Category)
+            .OrderItem.Include(oi => oi.Inventory)
             .Where(oi => oi.OrderId == orderId)
             .ToList();
     }
@@ -180,7 +232,6 @@ public class CartController : Controller
         return RedirectToAction("ViewCart");
     }
 
-    
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveItem(int orderItemId)
@@ -201,7 +252,7 @@ public class CartController : Controller
         var orderItems = GetOrderedItems(orderId);
         foreach (var orderItem in orderItems)
         {
-            if (orderItem.Quantity > orderItem.Item?.StockAmount)
+            if (orderItem.Quantity > orderItem.Inventory.Quantity)
             {
                 return false;
             }
@@ -242,7 +293,7 @@ public class CartController : Controller
         {
             foreach (var orderItem in orderItems)
             {
-                orderItem.Item.StockAmount -= orderItem.Quantity;
+                orderItem.Inventory.Quantity -= orderItem.Quantity;
             }
             await _context.SaveChangesAsync();
         }
