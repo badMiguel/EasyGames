@@ -37,6 +37,10 @@ public class CartSummaryViewComponent : ViewComponent
     private async Task<int> GetUserOrderId()
     {
         var customer = await GetCustomer();
+        if (customer == null)
+        {
+            return -1;
+        }
 
         var order = _context.Order.FirstOrDefault(o =>
             o.Status == OrderStatus.InCart && o.CustomerId == customer.CustomerId

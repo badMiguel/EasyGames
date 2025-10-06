@@ -38,8 +38,8 @@
         @{
         if (User.Identity?.IsAuthenticated ?? false) {
             <form asp-controller="Cart" method="POST" class="d-flex gap-3 mt-5">
-                <input type="hidden" asp-for="ItemId" />
-                <input type="hidden" asp-for="Item.SellPrice" />
+                <input type="hidden" asp-for="@Model.ItemId" />
+                <input type="hidden" asp-for="@Model.Inventory.InventoryId" />
 
                 <div class="flex-grow-1">
                     <label for="quantity" class="form-label">Quantity</label>

@@ -51,7 +51,7 @@ public class CartController : Controller
     private async Task<Customer?> GetCustomer()
     {
         var loggedInUserId = _userManager.GetUserId(User);
-        if (loggedInUserId == null)
+        if (loggedInUserId != null)
         {
             var getCustomer = await _context.Customer.FirstOrDefaultAsync(c =>
                 c.UserId == loggedInUserId
@@ -69,13 +69,16 @@ public class CartController : Controller
             return false;
         }
 
+        var inventory = await _context.Inventory.FirstOrDefaultAsync(i =>
+            i.InventoryId == itemDetails.Inventory.InventoryId
+        );
+
         var orderItem = await _context
             .OrderItem.Include(oi => oi.Order)
             .ThenInclude(o => o.Customer)
             .Include(oi => oi.Inventory)
-            .ThenInclude(i => i.ItemId)
             .FirstOrDefaultAsync(oi =>
-                oi.Inventory.ItemId == itemDetails.Inventory.ItemId
+                oi.Inventory.ItemId == inventory.ItemId
                 && oi.Order.Status == OrderStatus.InCart
                 && oi.Order.CustomerId == customer.CustomerId
             );
@@ -110,7 +113,7 @@ public class CartController : Controller
             new OrderItem
             {
                 OrderId = orderId,
-                InventoryId = itemDetails.InventoryId,
+                InventoryId = itemDetails.Inventory.InventoryId,
                 UnitPrice = unitPrice,
                 Quantity = quantity,
             }
@@ -194,6 +197,9 @@ public class CartController : Controller
     {
         return _context
             .OrderItem.Include(oi => oi.Inventory)
+            .ThenInclude(inv => inv.Item)
+            .ThenInclude(item => item.ItemCategorys)
+            .ThenInclude(ic => ic.Category)
             .Where(oi => oi.OrderId == orderId)
             .ToList();
     }
