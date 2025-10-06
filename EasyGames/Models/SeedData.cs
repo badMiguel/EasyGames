@@ -165,9 +165,11 @@ public static class SeedData
                 await context.SaveChangesAsync();
 
                 context.Customer.AddRange(
-                        new Customer { UserId = newCustomer.Id, IsGuest = false },
-                        new Customer { IsGuest = true }
-                        );
+                    new Customer { UserId = newCustomer.Id, IsGuest = false },
+                    new Customer { UserId = newOwner.Id, IsGuest = false },
+                    new Customer { UserId = newShopProprietor.Id, IsGuest = false },
+                    new Customer { IsGuest = true }
+                );
                 await context.SaveChangesAsync();
 
                 // Data generated with AI
@@ -250,16 +252,16 @@ public static class SeedData
                 await context.SaveChangesAsync();
 
                 context.ItemCategory.AddRange(
-                        new ItemCategory { ItemId = newItems[0].ItemId, CategoryId = books.CategoryId },
-                        new ItemCategory { ItemId = newItems[1].ItemId, CategoryId = books.CategoryId },
-                        new ItemCategory { ItemId = newItems[2].ItemId, CategoryId = books.CategoryId },
-                        new ItemCategory { ItemId = newItems[3].ItemId, CategoryId = games.CategoryId },
-                        new ItemCategory { ItemId = newItems[4].ItemId, CategoryId = games.CategoryId },
-                        new ItemCategory { ItemId = newItems[5].ItemId, CategoryId = games.CategoryId },
-                        new ItemCategory { ItemId = newItems[6].ItemId, CategoryId = toys.CategoryId },
-                        new ItemCategory { ItemId = newItems[7].ItemId, CategoryId = toys.CategoryId },
-                        new ItemCategory { ItemId = newItems[8].ItemId, CategoryId = toys.CategoryId }
-                        );
+                    new ItemCategory { ItemId = newItems[0].ItemId, CategoryId = books.CategoryId },
+                    new ItemCategory { ItemId = newItems[1].ItemId, CategoryId = books.CategoryId },
+                    new ItemCategory { ItemId = newItems[2].ItemId, CategoryId = books.CategoryId },
+                    new ItemCategory { ItemId = newItems[3].ItemId, CategoryId = games.CategoryId },
+                    new ItemCategory { ItemId = newItems[4].ItemId, CategoryId = games.CategoryId },
+                    new ItemCategory { ItemId = newItems[5].ItemId, CategoryId = games.CategoryId },
+                    new ItemCategory { ItemId = newItems[6].ItemId, CategoryId = toys.CategoryId },
+                    new ItemCategory { ItemId = newItems[7].ItemId, CategoryId = toys.CategoryId },
+                    new ItemCategory { ItemId = newItems[8].ItemId, CategoryId = toys.CategoryId }
+                );
                 await context.SaveChangesAsync();
 
                 var newReviews = new List<Review>
@@ -332,19 +334,19 @@ public static class SeedData
                 foreach (var item in newItems)
                 {
                     context.Inventory.AddRange(
-                            new Inventory
-                            {
+                        new Inventory
+                        {
                             ItemId = item.ItemId,
                             LocationId = newLocation[0].InventoryLocationId,
-                            Quantity = rnd.Next(1,101),
-                            },
-                            new Inventory
-                            {
+                            Quantity = rnd.Next(1, 101),
+                        },
+                        new Inventory
+                        {
                             ItemId = item.ItemId,
                             LocationId = newLocation[1].InventoryLocationId,
-                            Quantity = rnd.Next(1,101),
-                            }
-                            );
+                            Quantity = rnd.Next(1, 101),
+                        }
+                    );
                 }
 
                 await context.SaveChangesAsync();
