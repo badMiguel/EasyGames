@@ -71,7 +71,7 @@ public class HomeController : Controller
                     ItemId = item.ItemId,
                     Name = item.Name,
                     Category = category,
-                    Price = item.Price,
+                    Price = item.SellPrice,
                     Rating = rating.AverageRating,
                     RatingCount = rating.RatingCount,
                 }
@@ -134,7 +134,7 @@ public class HomeController : Controller
                     ItemId = item.ItemId,
                     Name = item.Name,
                     Category = name,
-                    Price = item.Price,
+                    Price = item.SellPrice,
                     Rating = rating.AverageRating,
                     RatingCount = rating.RatingCount,
                 }

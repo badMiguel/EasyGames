@@ -99,74 +99,74 @@ public static class SeedData
                     new Item
                     {
                         Name = "The Great Gatsby",
-                        Price = 10.99m,
+                        BuyPrice = 8.99m,
+                        SellPrice = 10.99m,
                         ProductionDate = new DateTime(2021, 2, 15),
                         Description = "Classic novel by F. Scott Fitzgerald",
-                        StockAmount = 25,
                     },
                     new Item
                     {
                         Name = "Harry Potter and the Sorcerer's Stone",
-                        Price = 12.50m,
+                        BuyPrice = 10.99m,
+                        SellPrice = 12.50m,
                         ProductionDate = new DateTime(2020, 2, 10),
                         Description = "Fantasy book by J.K. Rowling",
-                        StockAmount = 40,
                     },
                     new Item
                     {
                         Name = "Atomic Habits",
-                        Price = 15.00m,
+                        BuyPrice = 13.00m,
+                        SellPrice = 15.00m,
                         ProductionDate = new DateTime(2022, 2, 05),
                         Description = "Self-improvement book by James Clear",
-                        StockAmount = 30,
                     },
                     new Item
                     {
                         Name = "The Legend of Zelda: Breath of the Wild",
-                        Price = 59.99m,
+                        BuyPrice = 50.00m,
+                        SellPrice = 59.99m,
                         ProductionDate = new DateTime(2019, 2, 20),
                         Description = "Open-world adventure game for Nintendo Switch",
-                        StockAmount = 15,
                     },
                     new Item
                     {
                         Name = "Minecraft",
-                        Price = 26.95m,
+                        BuyPrice = 23.00m,
+                        SellPrice = 26.95m,
                         ProductionDate = new DateTime(2018, 2, 14),
                         Description = "Sandbox building game for multiple platforms",
-                        StockAmount = 50,
                     },
                     new Item
                     {
                         Name = "Chess Set",
-                        Price = 20.00m,
+                        BuyPrice = 15.00m,
+                        SellPrice = 20.00m,
                         ProductionDate = new DateTime(2021, 2, 10),
                         Description = "Classic strategy board game",
-                        StockAmount = 35,
                     },
                     new Item
                     {
                         Name = "LEGO Classic Box",
-                        Price = 45.00m,
+                        BuyPrice = 41.99m,
+                        SellPrice = 45.00m,
                         ProductionDate = new DateTime(2021, 2, 01),
                         Description = "Creative building blocks for all ages",
-                        StockAmount = 60,
                     },
                     new Item
                     {
                         Name = "Barbie Doll",
-                        Price = 18.99m,
+                        BuyPrice = 14.99m,
+                        SellPrice = 18.99m,
                         ProductionDate = new DateTime(2020, 2, 12),
                         Description = "Fashion doll with accessories",
-                        StockAmount = 25,
                     },
                     new Item
                     {
                         Name = "Remote Control Car",
-                        Price = 29.99m,
+                        BuyPrice = 26.82m,
+                        SellPrice = 29.99m,
                         ProductionDate = new DateTime(2022, 2, 22),
                         Description = "High-speed RC toy car with rechargeable battery",
-                        StockAmount = 20,
                     },
                 };
                 context.Item.AddRange(newItems);
@@ -187,15 +187,66 @@ public static class SeedData
 
                 var newReviews = new List<Review>
                 {
-                    new Review { ItemId = newItems[0].ItemId, StarRating = 5, UserId = newUser.Id, Comment = "Wow! I like this!" },
-                    new Review { ItemId = newItems[1].ItemId, StarRating = 4, UserId = newUser.Id, Comment = "Wow! I like this!" },
-                    new Review { ItemId = newItems[2].ItemId, StarRating = 5, UserId = newUser.Id},
-                    new Review { ItemId = newItems[3].ItemId, StarRating = 3, UserId = newUser.Id, Comment = "Its alright..." },
-                    new Review { ItemId = newItems[4].ItemId, StarRating = 2, UserId = newUser.Id },
-                    new Review { ItemId = newItems[5].ItemId, StarRating = 3, UserId = newUser.Id, Comment = "Its alright..." },
-                    new Review { ItemId = newItems[6].ItemId, StarRating = 1, UserId = newUser.Id, Comment = "I hate this!" },
-                    new Review { ItemId = newItems[7].ItemId, StarRating = 2, UserId = newUser.Id, Comment= "meh" },
-                    new Review { ItemId = newItems[8].ItemId, StarRating = 3, UserId = newUser.Id },
+                    new Review
+                    {
+                        ItemId = newItems[0].ItemId,
+                        StarRating = 5,
+                        UserId = newUser.Id,
+                        Comment = "Wow! I like this!",
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[1].ItemId,
+                        StarRating = 4,
+                        UserId = newUser.Id,
+                        Comment = "Wow! I like this!",
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[2].ItemId,
+                        StarRating = 5,
+                        UserId = newUser.Id,
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[3].ItemId,
+                        StarRating = 3,
+                        UserId = newUser.Id,
+                        Comment = "Its alright...",
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[4].ItemId,
+                        StarRating = 2,
+                        UserId = newUser.Id,
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[5].ItemId,
+                        StarRating = 3,
+                        UserId = newUser.Id,
+                        Comment = "Its alright...",
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[6].ItemId,
+                        StarRating = 1,
+                        UserId = newUser.Id,
+                        Comment = "I hate this!",
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[7].ItemId,
+                        StarRating = 2,
+                        UserId = newUser.Id,
+                        Comment = "meh",
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[8].ItemId,
+                        StarRating = 3,
+                        UserId = newUser.Id,
+                    },
                 };
                 context.Review.AddRange(newReviews);
                 context.SaveChanges();
