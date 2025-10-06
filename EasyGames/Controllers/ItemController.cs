@@ -1,17 +1,16 @@
+using EasyGames.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using EasyGames.Data;
-using EasyGames.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
+using EasyGames.Data;
+using EasyGames.Models;
 
 namespace EasyGames.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class ItemController : Controller
     {
         private readonly EasyGamesContext _context;
@@ -35,7 +34,8 @@ namespace EasyGames.Controllers
                 return NotFound();
             }
 
-            var item = await _context.Item.FirstOrDefaultAsync(m => m.ItemId == id);
+            var item = await _context.Item
+                .FirstOrDefaultAsync(m => m.ItemId == id);
             if (item == null)
             {
                 return NotFound();
@@ -55,9 +55,7 @@ namespace EasyGames.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            [Bind("ItemId,Name,Price,ProductionDate,Description,StockAmount")] Item item
-        )
+        public async Task<IActionResult> Create([Bind("ItemId,Name,BuyPrice,SellPrice,ProductionDate,Description")] Item item)
         {
             if (ModelState.IsValid)
             {
@@ -89,10 +87,7 @@ namespace EasyGames.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(
-            int id,
-            [Bind("ItemId,Name,Price,ProductionDate,Description,StockAmount")] Item item
-        )
+        public async Task<IActionResult> Edit(int id, [Bind("ItemId,Name,BuyPrice,SellPrice,ProductionDate,Description")] Item item)
         {
             if (id != item.ItemId)
             {
@@ -130,7 +125,8 @@ namespace EasyGames.Controllers
                 return NotFound();
             }
 
-            var item = await _context.Item.FirstOrDefaultAsync(m => m.ItemId == id);
+            var item = await _context.Item
+                .FirstOrDefaultAsync(m => m.ItemId == id);
             if (item == null)
             {
                 return NotFound();
