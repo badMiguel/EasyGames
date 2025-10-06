@@ -24,7 +24,7 @@ public class CartSummaryViewComponent : ViewComponent
     {
         var user = _httpContextAccessor.HttpContext?.User;
         var loggedInUserId = user?.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (loggedInUserId == null)
+        if (loggedInUserId != null)
         {
             var getCustomer = await _context.Customer.FirstOrDefaultAsync(c =>
                 c.UserId == loggedInUserId
