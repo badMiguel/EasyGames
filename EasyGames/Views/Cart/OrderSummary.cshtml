@@ -11,27 +11,27 @@
     <p>Your order number is #@ViewData["OrderId"]</p>
 </div>
 <div class="container" style="max-width: 800px;">
-    @foreach(var item in Model) 
+    @foreach(var orderItem in Model) 
     {
-    //    <div class="row mb-4 align-items-center">
-    //        <div class="col-3">
-    //            <img src="~/images/image.jpg" class="img-fluid rounded " alt="" />
-    //        </div>
-    //        <div class="col-6">
-    //            <p>
-    //                @(item.Item.ItemCategorys?.Any() == true
-    //                ? string.Join(", ", item.Item.ItemCategorys
-    //                .Select(ic => ic.Category?.Name ?? ""))
-    //                : "")
-    //            </p>
-    //            <h4 class="">@item.Item.Name</h4>
-    //        </div>
-    //        <div class="col-3">
-    //            @{totalPrice += item.UnitPrice * item.Quantity;}
-    //            <p class="fw-bold text-end mb-0">AU$@( item.UnitPrice * item.Quantity )</p>
-    //            <p class="text-secondary text-end">Qty: @item.Quantity</p>
-    //        </div>
-    //    </div>
+        <div class="row mb-4 align-items-center">
+            <div class="col-3">
+                <img src="~/images/image.jpg" class="img-fluid rounded " alt="" />
+            </div>
+            <div class="col-6">
+                <p>
+                    @(orderItem.Inventory.Item.ItemCategorys?.Any() == true
+                    ? string.Join(", ", orderItem.Inventory.Item.ItemCategorys
+                    .Select(ic => ic.Category?.Name ?? ""))
+                    : "")
+                </p>
+                <h4 class="">@orderItem.Inventory.Item.Name</h4>
+            </div>
+            <div class="col-3">
+                @{totalPrice += orderItem.UnitPrice * orderItem.Quantity;}
+                <p class="fw-bold text-end mb-0">AU$@( orderItem.UnitPrice * orderItem.Quantity )</p>
+                <p class="text-secondary text-end">Qty: @orderItem.Quantity</p>
+            </div>
+        </div>
     }
     <hr>
     <div class="row">
