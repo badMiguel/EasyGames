@@ -36,7 +36,13 @@ public class CartController : Controller
         {
             return RedirectToAction("Error", "Home");
         }
-        await CreateOrderItem(itemDetails, quantity, orderId, unitPrice);
+        var unitBuyPrice = await GetUnitBuyPrice(itemDetails.ItemId) ?? -1;
+        // price cannot be null, raise an error
+        if (unitBuyPrice <= -1)
+        {
+            return RedirectToAction("Error", "Home");
+        }
+        await CreateOrderItem(itemDetails, quantity, orderId, unitPrice, unitBuyPrice);
         return RedirectToAction("ItemDetails", "Home", new { id = itemDetails.ItemId });
     }
 
@@ -105,7 +111,8 @@ public class CartController : Controller
         ItemDetails itemDetails,
         int quantity,
         int orderId,
-        decimal unitPrice
+        decimal unitPrice,
+        decimal unitBuyPrice
     )
     {
         await _context.OrderItem.AddAsync(
@@ -114,6 +121,7 @@ public class CartController : Controller
                 OrderId = orderId,
                 InventoryId = itemDetails.Inventory.InventoryId,
                 UnitPrice = unitPrice,
+                UnitBuyPrice = unitBuyPrice,
                 Quantity = quantity,
             }
         );
@@ -129,6 +137,17 @@ public class CartController : Controller
         }
         return inventory.SellPrice;
     }
+
+    private async Task<decimal?> GetUnitBuyPrice(int id)
+    {
+        var item = await _context.Item.FindAsync(id);
+        if (item == null)
+        {
+            return null;
+        }
+        return item.BuyPrice;
+    }
+
 
     private async Task<int> GetUserOrderId()
     {
@@ -172,7 +191,13 @@ public class CartController : Controller
         {
             return RedirectToAction("Error", "Home");
         }
-        await CreateOrderItem(itemDetails, quantity, orderId, unitPrice);
+        var unitBuyPrice = await GetUnitBuyPrice(itemDetails.ItemId) ?? -1;
+        // price cannot be null, raise an error
+        if (unitBuyPrice <= -1)
+        {
+            return RedirectToAction("Error", "Home");
+        }
+        await CreateOrderItem(itemDetails, quantity, orderId, unitPrice, unitBuyPrice);
         return RedirectToAction("ViewCart");
     }
 

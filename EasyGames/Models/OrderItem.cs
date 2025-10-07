@@ -24,6 +24,13 @@ public class OrderItem
     [Column(TypeName = "decimal(18,2)")]
     public decimal UnitPrice { get; set; }
 
+    // Total BuyPrice wont be stored, just computed based on quantity
+    [Range(1, 100)]
+    [DataType(DataType.Currency)]
+    [Display(Name = "Buy Price")]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal UnitBuyPrice { get; set; }
+
     // Discount stored as decimal, to be converted to percent
     // Default no discount was used
     [Display(Name = "Discount")]
