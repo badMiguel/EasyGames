@@ -144,8 +144,13 @@ namespace EasyGames.Controllers
             {
                 return NotFound();
             }
-            ViewData["ItemId"] = new SelectList(_context.Item, "ItemId", "Name", inventory.ItemId);
-            ViewData["ShopId"] = new SelectList(
+            ViewData["ItemIdList"] = new SelectList(
+                _context.Item,
+                "ItemId",
+                "Name",
+                inventory.ItemId
+            );
+            ViewData["ShopIdList"] = new SelectList(
                 _context.Shop,
                 "ShopId",
                 "ShopName",
@@ -178,7 +183,9 @@ namespace EasyGames.Controllers
                         i.ItemId == inventory.ItemId && i.ShopId == inventory.ShopId
                     );
 
-                if (inventoryOfItem != null)
+                var oldInventory = await _context.Inventory.FindAsync(inventory.InventoryId);
+
+                if (inventoryOfItem != null && oldInventory.ItemId != inventory.ItemId)
                 {
                     ViewData["ItemIdList"] = new SelectList(
                         _context.Item,
@@ -202,7 +209,10 @@ namespace EasyGames.Controllers
                 }
                 try
                 {
-                    _context.Update(inventory);
+                    oldInventory.ItemId = inventory.ItemId;
+                    oldInventory.ShopId = inventory.ShopId;
+                    oldInventory.Quantity = inventory.Quantity;
+                    oldInventory.SellPrice = inventory.SellPrice;
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -218,7 +228,12 @@ namespace EasyGames.Controllers
                 }
                 return RedirectToAction(nameof(Index), new { shopId = inventory.ShopId });
             }
-            ViewData["ItemIdList"] = new SelectList(_context.Item, "ItemId", "Name", inventory.ItemId);
+            ViewData["ItemIdList"] = new SelectList(
+                _context.Item,
+                "ItemId",
+                "Name",
+                inventory.ItemId
+            );
             ViewData["ShopIdList"] = new SelectList(
                 _context.Shop,
                 "ShopId",
