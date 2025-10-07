@@ -4,8 +4,8 @@ public class Inventory
 {
     public int InventoryId { get; set; }
 
-    public int LocationId { get; set; }
-    public InventoryLocation? Location { get; set; }
+    public int ShopId { get; set; }
+    public Shop? Shop { get; set; }
 
     public int ItemId { get; set; }
     public Item? Item { get; set; }

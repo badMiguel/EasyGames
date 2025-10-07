@@ -175,10 +175,10 @@ public class HomeController : Controller
         }
 
         var inventory = await _context
-            .Inventory.Include(i => i.Location)
+            .Inventory.Include(i => i.Shop)
             .Include(i => i.Item)
             .FirstOrDefaultAsync(i =>
-                i.Location!.LocationType == LocationTypes.Online && i.ItemId == item.ItemId
+                i.Shop!.LocationType == LocationTypes.Online && i.ItemId == item.ItemId
             );
         if (inventory == null)
         {

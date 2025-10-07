@@ -43,9 +43,8 @@ public class CartController : Controller
     private async Task<Shop?> GetOnlineShop()
     {
         return await _context
-            .Shop.Include(s => s.Location)
-            .ThenInclude(l => l.Inventories)
-            .FirstOrDefaultAsync(s => s.Location.LocationType == LocationTypes.Online);
+            .Shop.Include(s => s.Inventories)
+            .FirstOrDefaultAsync(s => s.LocationType == LocationTypes.Online);
     }
 
     private async Task<Customer?> GetCustomer()

@@ -125,32 +125,18 @@ public static class SeedData
                         ShopName = "Online Shop",
                         ContactNumber = "+6123456789",
                         OwnerId = newOwner.Id,
+                        LocationType = LocationTypes.Online,
                     },
                     new Shop
                     {
                         ShopName = "Tiny Shop",
                         ContactNumber = "+6987654321",
                         OwnerId = newShopProprietor.Id,
-                    },
-                };
-                context.Shop.AddRange(newShops);
-                await context.SaveChangesAsync();
-
-                var newLocation = new List<InventoryLocation>
-                {
-                    new InventoryLocation
-                    {
-                        ShopId = newShops[0].ShopId,
-                        LocationType = LocationTypes.Online,
-                    },
-                    new InventoryLocation
-                    {
-                        ShopId = newShops[1].ShopId,
                         LocationType = LocationTypes.Physical,
                         Address = "123 Big Street, Tiny City",
                     },
                 };
-                context.InventoryLocation.AddRange(newLocation);
+                context.Shop.AddRange(newShops);
                 await context.SaveChangesAsync();
 
                 context.Customer.AddRange(
@@ -326,13 +312,13 @@ public static class SeedData
                         new Inventory
                         {
                             ItemId = item.ItemId,
-                            LocationId = newLocation[0].InventoryLocationId,
+                            ShopId = newShops[0].ShopId,
                             Quantity = rnd.Next(1, 101),
                         },
                         new Inventory
                         {
                             ItemId = item.ItemId,
-                            LocationId = newLocation[1].InventoryLocationId,
+                            ShopId = newShops[1].ShopId,
                             Quantity = rnd.Next(1, 101),
                         }
                     );
