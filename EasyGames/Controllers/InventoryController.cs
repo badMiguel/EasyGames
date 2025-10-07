@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EasyGames.Data;
-using EasyGames.Data;
 using EasyGames.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,8 +26,13 @@ namespace EasyGames.Controllers
         [HttpGet("")]
         public async Task<IActionResult> Index([FromRoute] int shopId)
         {
+            var shop = await _context.Shop.FindAsync(shopId);
+            ViewData["ShopName"] = shop.ShopName;
             ViewData["ShopId"] = shopId;
-            var easyGamesContext = _context.Inventory.Include(i => i.Item).Include(i => i.Shop);
+            var easyGamesContext = _context
+                .Inventory.Include(i => i.Item)
+                .Include(i => i.Shop)
+                .Where(i => i.ShopId == shopId);
             return View(await easyGamesContext.ToListAsync());
         }
 

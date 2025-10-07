@@ -4,7 +4,7 @@
     ViewData["Title"] = "Inventory List";
 }
 
-<h1>Index</h1>
+<h1>@ViewData["ShopName"] Inventory</h1>
 
 <p>
     <a asp-route-shopId="@ViewData["ShopId"]" asp-action="Create">Create New</a>
@@ -12,9 +12,6 @@
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Shop)
-            </th>
             <th>
                 @Html.DisplayNameFor(model => model.Item)
             </th>
@@ -27,9 +24,6 @@
     <tbody>
 @foreach (var item in Model) {
         <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Shop.ShopName)
-            </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Item.Name)
             </td>
