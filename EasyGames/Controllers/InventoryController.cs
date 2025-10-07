@@ -60,9 +60,9 @@ namespace EasyGames.Controllers
 
         // GET: Inventory/Create
         [HttpGet("Create")]
-        public IActionResult Create([FromRoute] int ShopId)
+        public IActionResult Create([FromRoute] int shopId)
         {
-            ViewData["ShopId"] = ShopId;
+            ViewData["ShopId"] = shopId;
 
             ViewData["ItemIdList"] = new SelectList(_context.Item, "ItemId", "Name");
             ViewData["ShopIdList"] = new SelectList(_context.Shop, "ShopId", "ShopName");
@@ -75,7 +75,7 @@ namespace EasyGames.Controllers
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("InventoryId,ShopId,ItemId,Quantity")] Inventory inventory
+            [Bind("InventoryId,ShopId,ItemId,SellPrice,Quantity")] Inventory inventory
         )
         {
             if (ModelState.IsValid)
@@ -89,18 +89,19 @@ namespace EasyGames.Controllers
 
                 if (inventoryOfItem != null)
                 {
-                    ViewData["ItemId"] = new SelectList(
+                    ViewData["ItemIdList"] = new SelectList(
                         _context.Item,
                         "ItemId",
                         "Name",
                         inventory.ItemId
                     );
-                    ViewData["ShopId"] = new SelectList(
+                    ViewData["ShopIdList"] = new SelectList(
                         _context.Shop,
                         "ShopId",
                         "ShopName",
                         inventory.ShopId
                     );
+                    ViewData["ShopId"] = inventory.ShopId;
 
                     ModelState.AddModelError(
                         "ItemId",
@@ -111,10 +112,16 @@ namespace EasyGames.Controllers
 
                 _context.Add(inventory);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { shopId = inventory.ShopId });
             }
-            ViewData["ItemId"] = new SelectList(_context.Item, "ItemId", "Name", inventory.ItemId);
-            ViewData["ShopId"] = new SelectList(
+            ViewData["ShopId"] = inventory.ShopId;
+            ViewData["ItemIdList"] = new SelectList(
+                _context.Item,
+                "ItemId",
+                "Name",
+                inventory.ItemId
+            );
+            ViewData["ShopIdList"] = new SelectList(
                 _context.Shop,
                 "ShopId",
                 "ShopName",
@@ -154,7 +161,7 @@ namespace EasyGames.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             int id,
-            [Bind("InventoryId,ShopId,ItemId,Quantity")] Inventory inventory
+            [Bind("InventoryId,ShopId,ItemId,SellPrice,Quantity")] Inventory inventory
         )
         {
             if (id != inventory.InventoryId)
@@ -164,6 +171,35 @@ namespace EasyGames.Controllers
 
             if (ModelState.IsValid)
             {
+                var inventoryOfItem = await _context
+                    .Inventory.Include(i => i.Item)
+                    .Include(i => i.Shop)
+                    .FirstOrDefaultAsync(i =>
+                        i.ItemId == inventory.ItemId && i.ShopId == inventory.ShopId
+                    );
+
+                if (inventoryOfItem != null)
+                {
+                    ViewData["ItemIdList"] = new SelectList(
+                        _context.Item,
+                        "ItemId",
+                        "Name",
+                        inventory.ItemId
+                    );
+                    ViewData["ShopIdList"] = new SelectList(
+                        _context.Shop,
+                        "ShopId",
+                        "ShopName",
+                        inventory.ShopId
+                    );
+                    ViewData["ShopId"] = inventory.ShopId;
+
+                    ModelState.AddModelError(
+                        "ItemId",
+                        $"Sorry, shop '{inventoryOfItem.Shop.ShopName}' already have item '{inventoryOfItem.Item.Name}' in their inventory."
+                    );
+                    return View(inventory);
+                }
                 try
                 {
                     _context.Update(inventory);
@@ -180,10 +216,10 @@ namespace EasyGames.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { shopId = inventory.ShopId });
             }
-            ViewData["ItemId"] = new SelectList(_context.Item, "ItemId", "Name", inventory.ItemId);
-            ViewData["ShopId"] = new SelectList(
+            ViewData["ItemIdList"] = new SelectList(_context.Item, "ItemId", "Name", inventory.ItemId);
+            ViewData["ShopIdList"] = new SelectList(
                 _context.Shop,
                 "ShopId",
                 "ShopName",
