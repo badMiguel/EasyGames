@@ -4,6 +4,16 @@ HIT339 Assignment 2
 
 ---
 
+# User Credentials
+
+| Role            | Email              | Password     |
+| --------------- | ------------------ | ------------ |
+| Owner           | owner@email.com    | Owner123.    |
+| Shop Proprietor | shop@email.com     | Shop123.     |
+| Customer        | customer@email.com | Customer123. |
+
+---
+
 # Requirements
 
 ## User Roles
