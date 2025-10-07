@@ -44,7 +44,7 @@
                         </li>
                         
                         @{ 
-                            if (User.IsInRole("Admin")) 
+                            if (User.IsInRole(UserRoles.Owner)) 
                             {
                                 <!-- FOR ADMINS ONLY -->
                                 <li class="nav-item">

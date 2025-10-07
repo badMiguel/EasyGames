@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Identity;
 
 namespace EasyGames.Models;
 
-public enum UserRoles
+public static class UserRoles
 {
-    Owner,
-    ShopProprietor,
-    Customer,
+    public const string Owner = "Owner";
+    public const string ShopProprietor = "ShopProprietor";
+    public const string Customer = "Customer";
+
+    public static readonly string[] AllRoles = { Owner, ShopProprietor, Customer };
 }
 
 public class ApplicationUser : IdentityUser

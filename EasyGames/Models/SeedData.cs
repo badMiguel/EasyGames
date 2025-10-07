@@ -20,7 +20,7 @@ public static class SeedData
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         {
             // ---- FOR USERS ----
-            foreach (var role in Enum.GetNames(typeof(UserRoles)))
+            foreach (var role in UserRoles.AllRoles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
                 {
@@ -45,13 +45,13 @@ public static class SeedData
             if (customer == null)
             {
                 await userManager.CreateAsync(newCustomer, "Customer123.");
-                await userManager.AddToRoleAsync(newCustomer, UserRoles.Customer.ToString());
+                await userManager.AddToRoleAsync(newCustomer, UserRoles.Customer);
             }
             else
             {
-                if (!await userManager.IsInRoleAsync(customer, UserRoles.Customer.ToString()))
+                if (!await userManager.IsInRoleAsync(customer, UserRoles.Customer))
                 {
-                    await userManager.AddToRoleAsync(customer, UserRoles.Customer.ToString());
+                    await userManager.AddToRoleAsync(customer, UserRoles.Customer);
                 }
             }
 
@@ -64,24 +64,13 @@ public static class SeedData
             if (shopProprietor == null)
             {
                 await userManager.CreateAsync(newShopProprietor, "Shop123.");
-                await userManager.AddToRoleAsync(
-                    newShopProprietor,
-                    UserRoles.ShopProprietor.ToString()
-                );
+                await userManager.AddToRoleAsync(newShopProprietor, UserRoles.ShopProprietor);
             }
             else
             {
-                if (
-                    !await userManager.IsInRoleAsync(
-                        newShopProprietor,
-                        UserRoles.ShopProprietor.ToString()
-                    )
-                )
+                if (!await userManager.IsInRoleAsync(newShopProprietor, UserRoles.ShopProprietor))
                 {
-                    await userManager.AddToRoleAsync(
-                        newShopProprietor,
-                        UserRoles.ShopProprietor.ToString()
-                    );
+                    await userManager.AddToRoleAsync(newShopProprietor, UserRoles.ShopProprietor);
                 }
             }
 
@@ -94,13 +83,13 @@ public static class SeedData
             if (owner == null)
             {
                 await userManager.CreateAsync(newOwner, "Owner123.");
-                await userManager.AddToRoleAsync(newOwner, UserRoles.Owner.ToString());
+                await userManager.AddToRoleAsync(newOwner, UserRoles.Owner);
             }
             else
             {
-                if (!await userManager.IsInRoleAsync(newOwner, UserRoles.Owner.ToString()))
+                if (!await userManager.IsInRoleAsync(newOwner, UserRoles.Owner))
                 {
-                    await userManager.AddToRoleAsync(newOwner, UserRoles.Owner.ToString());
+                    await userManager.AddToRoleAsync(newOwner, UserRoles.Owner);
                 }
             }
 
