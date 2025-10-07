@@ -1,5 +1,9 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+
 namespace EasyGames.Models;
 
+[Index(nameof(ShopId), nameof(ItemId), IsUnique = true)]
 public class Inventory
 {
     public int InventoryId { get; set; }

@@ -68,6 +68,35 @@ namespace EasyGames.Controllers
         {
             if (ModelState.IsValid)
             {
+                var inventoryOfItem = await _context
+                    .Inventory.Include(i => i.Item)
+                    .Include(i => i.Shop)
+                    .FirstOrDefaultAsync(i =>
+                        i.ItemId == inventory.ItemId && i.ShopId == inventory.ShopId
+                    );
+
+                if (inventoryOfItem != null)
+                {
+                    ViewData["ItemId"] = new SelectList(
+                        _context.Item,
+                        "ItemId",
+                        "Name",
+                        inventory.ItemId
+                    );
+                    ViewData["ShopId"] = new SelectList(
+                        _context.Shop,
+                        "ShopId",
+                        "ShopName",
+                        inventory.ShopId
+                    );
+
+                    ModelState.AddModelError(
+                        "ItemId",
+                        $"Sorry, shop '{inventoryOfItem.Shop.ShopName}' already have item '{inventoryOfItem.Item.Name}' in their inventory."
+                    );
+                    return View(inventory);
+                }
+
                 _context.Add(inventory);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
