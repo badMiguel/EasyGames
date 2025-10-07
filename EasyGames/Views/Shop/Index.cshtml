@@ -4,7 +4,7 @@
     ViewData["Title"] = "Shop List";
 }
 
-<h1>Index</h1>
+<h1>Shops</h1>
 
 <p>
     <a asp-action="Create">Create New</a>
@@ -16,16 +16,10 @@
                 @Html.DisplayNameFor(model => model.ShopName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ContactNumber)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.LocationType)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Address)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Owner)
+                @Html.DisplayNameFor(model => model.Owner.UserName)
             </th>
             <th></th>
         </tr>
@@ -37,16 +31,10 @@
                 @Html.DisplayFor(modelItem => item.ShopName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.ContactNumber)
-            </td>
-            <td>
                 @Html.DisplayFor(modelItem => item.LocationType)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Address)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Owner.Id)
+                @Html.DisplayFor(modelItem => item.Owner.UserName)
             </td>
             <td>
                 <a asp-controller="Inventory" asp-action="Index" asp-route-shopId="@item.ShopId">View Inventory</a> |
