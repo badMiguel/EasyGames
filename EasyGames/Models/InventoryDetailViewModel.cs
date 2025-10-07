@@ -22,6 +22,10 @@ public class InventoryDetailViewModel
     public int TotalUnitsSold { get; set; }
 
     [DataType(DataType.Currency)]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal Revenue { get; set; }
+
+    [DataType(DataType.Currency)]
     [Display(Name = "Profit Generated")]
     [Column(TypeName = "decimal(18,2)")]
     public decimal ProfitGenerated { get; set; }

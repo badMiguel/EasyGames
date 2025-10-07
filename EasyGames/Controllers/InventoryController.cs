@@ -29,11 +29,18 @@ namespace EasyGames.Controllers
                 .SumAsync(oi => oi.Quantity);
         }
 
-        private async Task<decimal> GetProfitGenerated(Inventory inventory)
+        private async Task<decimal> GetRevenue(Inventory inventory)
         {
             return await _context
                 .OrderItem.Where(oi => oi.InventoryId == inventory.InventoryId)
                 .SumAsync(oi => oi.Quantity * oi.UnitPrice);
+        }
+
+        private async Task<decimal> GetProfitGenerated(Inventory inventory)
+        {
+            return await _context
+                .OrderItem.Where(oi => oi.InventoryId == inventory.InventoryId)
+                .SumAsync(oi => oi.Quantity * (oi.UnitPrice - oi.UnitBuyPrice));
         }
 
         // GET: Inventory
@@ -79,6 +86,7 @@ namespace EasyGames.Controllers
                 SellPrice = inventory.SellPrice,
                 Quantity = inventory.Quantity,
                 TotalUnitsSold = await GetUnitsSoldByShop(inventory),
+                Revenue = await GetRevenue(inventory),
                 ProfitGenerated = await GetProfitGenerated(inventory),
             };
 

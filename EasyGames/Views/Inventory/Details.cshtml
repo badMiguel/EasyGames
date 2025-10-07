@@ -22,11 +22,11 @@
             <td class="px-0"><a asp-controller="Item" asp-action="Details" asp-route-id="@Model.ItemId">Visit Item</a></td>
         </tr>
         <tr>
-            <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.Item.BuyPrice)</td>
+            <td class="px-0 col-sm-2 fw-bold">Current @Html.DisplayNameFor(model => model.Item.BuyPrice)</td>
             <td class="px-0">@Html.DisplayFor(model => model.Item.BuyPrice)</td>
         </tr>
         <tr>
-            <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.SellPrice)</td>
+            <td class="px-0 col-sm-2 fw-bold">Current @Html.DisplayNameFor(model => model.SellPrice)</td>
             <td class="px-0">@Html.DisplayFor(model => model.SellPrice)</td>
         </tr>
         <tr>
@@ -36,6 +36,10 @@
         <tr>
             <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.TotalUnitsSold)</td>
             <td class="px-0">@Html.DisplayFor(model => model.TotalUnitsSold)</td>
+        </tr>
+        <tr>
+            <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.Revenue)</td>
+            <td class="px-0">@Html.DisplayFor(model => model.Revenue)</td>
         </tr>
         <tr>
             <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.ProfitGenerated)</td>
