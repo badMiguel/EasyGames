@@ -1,7 +1,7 @@
 @model IEnumerable<EasyGames.Models.Item>
 
 @{
-    ViewData["Title"] = "Item List";
+    ViewData["Title"] = "Index";
 }
 
 <h1>Index</h1>
@@ -17,9 +17,6 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.BuyPrice)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SellPrice)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.ProductionDate)
@@ -38,9 +35,6 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.BuyPrice)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.SellPrice)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.ProductionDate)

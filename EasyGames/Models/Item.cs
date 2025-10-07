@@ -17,12 +17,6 @@ public class Item
     [Column(TypeName = "decimal(18,2)")]
     public decimal BuyPrice { get; set; }
 
-    [Range(1, 100)]
-    [DataType(DataType.Currency)]
-    [Display(Name = "Sell Price")]
-    [Column(TypeName = "decimal(18,2)")]
-    public decimal SellPrice { get; set; }
-
     [Display(Name = "Production Date")]
     [DataType(DataType.Date)]
     [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]

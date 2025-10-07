@@ -56,7 +56,7 @@ namespace EasyGames.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("ItemId,Name,BuyPrice,SellPrice,ProductionDate,Description")] Item item
+            [Bind("ItemId,Name,BuyPrice,ProductionDate,Description")] Item item
         )
         {
             if (ModelState.IsValid)
@@ -91,7 +91,7 @@ namespace EasyGames.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             int id,
-            [Bind("ItemId,Name,BuyPrice,SellPrice,ProductionDate,Description")] Item item
+            [Bind("ItemId,Name,BuyPrice,ProductionDate,Description")] Item item
         )
         {
             if (id != item.ItemId)

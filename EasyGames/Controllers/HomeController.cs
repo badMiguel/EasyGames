@@ -43,7 +43,7 @@ public class HomeController : Controller
 
     // Helper method to get top 3 items from each categories to display on the
     // home page.
-    private void GetTopItems(Dictionary<string, List<HomeItemCards>> itemCards, string category)
+    private async Task GetTopItems(Dictionary<string, List<HomeItemCards>> itemCards, string category)
     {
         var getItems = _context
             .Category.Include(c => c.ItemCategories)
@@ -64,6 +64,7 @@ public class HomeController : Controller
                 continue;
 
             var rating = GetRating(item.ItemId);
+            var inventory = await _context.Inventory.FindAsync(item.ItemId);
 
             itemList.Add(
                 new HomeItemCards
@@ -71,7 +72,7 @@ public class HomeController : Controller
                     ItemId = item.ItemId,
                     Name = item.Name,
                     Category = category,
-                    Price = item.SellPrice,
+                    Price = inventory.SellPrice,
                     Rating = rating.AverageRating,
                     RatingCount = rating.RatingCount,
                 }
@@ -99,7 +100,7 @@ public class HomeController : Controller
         return ((double)sumRating / reviews.Count, rateCounter);
     }
 
-    public IActionResult Category(string name)
+    public async Task<IActionResult> Category(string name)
     {
         if (string.IsNullOrEmpty(name))
         {
@@ -127,6 +128,7 @@ public class HomeController : Controller
                 continue;
 
             var rating = GetRating(item.ItemId);
+            var inventory = await _context.Inventory.FindAsync(item.ItemId);
 
             itemList.Add(
                 new HomeItemCards
@@ -134,7 +136,7 @@ public class HomeController : Controller
                     ItemId = item.ItemId,
                     Name = item.Name,
                     Category = name,
-                    Price = item.SellPrice,
+                    Price = inventory.SellPrice,
                     Rating = rating.AverageRating,
                     RatingCount = rating.RatingCount,
                 }

@@ -30,7 +30,7 @@ public class CartController : Controller
         }
 
         var orderId = await GetUserOrderId();
-        var unitPrice = await GetUnitPrice(itemDetails.ItemId) ?? -1;
+        var unitPrice = await GetUnitPrice(itemDetails.InventoryId) ?? -1;
         // price cannot be null, raise an error
         if (unitPrice <= -1)
         {
@@ -122,12 +122,12 @@ public class CartController : Controller
 
     private async Task<decimal?> GetUnitPrice(int id)
     {
-        var item = await _context.Item.FindAsync(id);
-        if (item == null)
+        var inventory = await _context.Inventory.FindAsync(id);
+        if (inventory == null)
         {
             return null;
         }
-        return item.SellPrice;
+        return inventory.SellPrice;
     }
 
     private async Task<int> GetUserOrderId()
@@ -166,7 +166,7 @@ public class CartController : Controller
         }
 
         var orderId = await GetUserOrderId();
-        var unitPrice = await GetUnitPrice(itemDetails.ItemId) ?? -1;
+        var unitPrice = await GetUnitPrice(itemDetails.InventoryId) ?? -1;
         // price cannot be null, raise an error
         if (unitPrice <= -1)
         {

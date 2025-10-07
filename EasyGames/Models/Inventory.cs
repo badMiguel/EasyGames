@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
 namespace EasyGames.Models;
@@ -13,6 +14,12 @@ public class Inventory
 
     public int ItemId { get; set; }
     public Item? Item { get; set; }
+
+    [Range(1, 100)]
+    [DataType(DataType.Currency)]
+    [Display(Name = "Sell Price")]
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal SellPrice { get; set; }
 
     public int Quantity { get; set; }
 

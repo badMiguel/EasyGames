@@ -154,7 +154,6 @@ public static class SeedData
                     {
                         Name = "The Great Gatsby",
                         BuyPrice = 8.99m,
-                        SellPrice = 10.99m,
                         ProductionDate = new DateTime(2021, 2, 15),
                         Description = "Classic novel by F. Scott Fitzgerald",
                     },
@@ -162,7 +161,6 @@ public static class SeedData
                     {
                         Name = "Harry Potter and the Sorcerer's Stone",
                         BuyPrice = 10.99m,
-                        SellPrice = 12.50m,
                         ProductionDate = new DateTime(2020, 2, 10),
                         Description = "Fantasy book by J.K. Rowling",
                     },
@@ -170,7 +168,6 @@ public static class SeedData
                     {
                         Name = "Atomic Habits",
                         BuyPrice = 13.00m,
-                        SellPrice = 15.00m,
                         ProductionDate = new DateTime(2022, 2, 05),
                         Description = "Self-improvement book by James Clear",
                     },
@@ -178,7 +175,6 @@ public static class SeedData
                     {
                         Name = "The Legend of Zelda: Breath of the Wild",
                         BuyPrice = 50.00m,
-                        SellPrice = 59.99m,
                         ProductionDate = new DateTime(2019, 2, 20),
                         Description = "Open-world adventure game for Nintendo Switch",
                     },
@@ -186,7 +182,6 @@ public static class SeedData
                     {
                         Name = "Minecraft",
                         BuyPrice = 23.00m,
-                        SellPrice = 26.95m,
                         ProductionDate = new DateTime(2018, 2, 14),
                         Description = "Sandbox building game for multiple platforms",
                     },
@@ -194,7 +189,6 @@ public static class SeedData
                     {
                         Name = "Chess Set",
                         BuyPrice = 15.00m,
-                        SellPrice = 20.00m,
                         ProductionDate = new DateTime(2021, 2, 10),
                         Description = "Classic strategy board game",
                     },
@@ -202,7 +196,6 @@ public static class SeedData
                     {
                         Name = "LEGO Classic Box",
                         BuyPrice = 41.99m,
-                        SellPrice = 45.00m,
                         ProductionDate = new DateTime(2021, 2, 01),
                         Description = "Creative building blocks for all ages",
                     },
@@ -210,7 +203,6 @@ public static class SeedData
                     {
                         Name = "Barbie Doll",
                         BuyPrice = 14.99m,
-                        SellPrice = 18.99m,
                         ProductionDate = new DateTime(2020, 2, 12),
                         Description = "Fashion doll with accessories",
                     },
@@ -218,7 +210,6 @@ public static class SeedData
                     {
                         Name = "Remote Control Car",
                         BuyPrice = 26.82m,
-                        SellPrice = 29.99m,
                         ProductionDate = new DateTime(2022, 2, 22),
                         Description = "High-speed RC toy car with rechargeable battery",
                     },
@@ -314,12 +305,14 @@ public static class SeedData
                             ItemId = item.ItemId,
                             ShopId = newShops[0].ShopId,
                             Quantity = rnd.Next(1, 101),
+                            SellPrice = item.BuyPrice + rnd.Next(1, 10),
                         },
                         new Inventory
                         {
                             ItemId = item.ItemId,
                             ShopId = newShops[1].ShopId,
                             Quantity = rnd.Next(1, 101),
+                            SellPrice = item.BuyPrice + rnd.Next(1, 10),
                         }
                     );
                 }
