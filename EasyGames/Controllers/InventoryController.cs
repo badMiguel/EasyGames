@@ -22,6 +22,20 @@ namespace EasyGames.Controllers
             _context = context;
         }
 
+        private async Task<int> GetUnitsSoldByShop(Inventory inventory)
+        {
+            return await _context
+                .OrderItem.Where(oi => oi.InventoryId == inventory.InventoryId)
+                .SumAsync(oi => oi.Quantity);
+        }
+
+        private async Task<decimal> GetProfitGenerated(Inventory inventory)
+        {
+            return await _context
+                .OrderItem.Where(oi => oi.InventoryId == inventory.InventoryId)
+                .SumAsync(oi => oi.Quantity * oi.UnitPrice);
+        }
+
         // GET: Inventory
         [HttpGet("")]
         public async Task<IActionResult> Index([FromRoute] int shopId)
@@ -55,7 +69,20 @@ namespace EasyGames.Controllers
                 return NotFound();
             }
 
-            return View(inventory);
+            var inventoryDetails = new InventoryDetailViewModel
+            {
+                InventoryId = inventory.InventoryId,
+                Item = inventory.Item,
+                ItemId = inventory.ItemId,
+                Shop = inventory.Shop,
+                ShopId = inventory.ShopId,
+                SellPrice = inventory.SellPrice,
+                Quantity = inventory.Quantity,
+                TotalUnitsSold = await GetUnitsSoldByShop(inventory),
+                ProfitGenerated = await GetProfitGenerated(inventory),
+            };
+
+            return View(inventoryDetails);
         }
 
         // GET: Inventory/Create

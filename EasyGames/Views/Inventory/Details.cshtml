@@ -1,4 +1,4 @@
-@model EasyGames.Models.Inventory
+@model EasyGames.Models.InventoryDetailViewModel
 
 @{
     ViewData["Title"] = "Details";
@@ -30,8 +30,16 @@
             <td class="px-0">@Html.DisplayFor(model => model.SellPrice)</td>
         </tr>
         <tr>
-            <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.Quantity)</td>
+            <td class="px-0 col-sm-2 fw-bold">Stock Left</td>
             <td class="px-0">@Html.DisplayFor(model => model.Quantity)</td>
+        </tr>
+        <tr>
+            <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.TotalUnitsSold)</td>
+            <td class="px-0">@Html.DisplayFor(model => model.TotalUnitsSold)</td>
+        </tr>
+        <tr>
+            <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.ProfitGenerated)</td>
+            <td class="px-0">@Html.DisplayFor(model => model.ProfitGenerated)</td>
         </tr>
     </table>
 </div>
