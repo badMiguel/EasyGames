@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Cart";
-    var totalPrice = 0m;
+    decimal totalPrice = 0m;
 }
 
 <h1 class="text-center mb-5">My Cart</h1>
@@ -47,8 +47,9 @@
                 <input type="submit" value="Change" formaction="/Cart/ChangeQuantity" class="btn btn-primary btn-sm" />
             </form>
         </div>
-        @{totalPrice += orderItem.UnitPrice * orderItem.Quantity;}
-        <p class="col-2 text-end">AU$@( orderItem.UnitPrice * orderItem.Quantity)</p>
+        @{decimal orderPrice = orderItem.UnitPrice * orderItem.Quantity;}
+        @{totalPrice += orderPrice;}
+        <p class="col-2 text-end">AU @orderPrice.ToString("C")</p>
         <div class="col-1">
             <form asp-controller="Cart" asp-action="RemoveItem" method="post" class="text-center">
                 <input type="hidden" name="orderItemId" value="@orderItem.OrderItemId" />
@@ -65,7 +66,7 @@
 <div class="row">
     <div class="col-2"></div>
     <p class="fw-bold fs-5 col-7">Total</p>
-    <p class="col-2 text-end fw-bold fs-5">AU$@totalPrice</p>
+    <p class="col-2 text-end fw-bold fs-5">AU @totalPrice.ToString("C")</p>
 </div>
 
 <div class="row">
