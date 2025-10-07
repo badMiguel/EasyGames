@@ -47,17 +47,14 @@
                             if (User.IsInRole(UserRoles.Owner) || User.IsInRole(UserRoles.ShopProprietor)) 
                             {
                             <!-- FOR OWNER AND SHOP PROPRIETOR ONLY -->
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Inventory" asp-action="Index">Inventory</a>
-                            </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Shop" asp-action="Index">Shops</a>
+                                </li>
                             }
 
                             if (User.IsInRole(UserRoles.Owner)) 
                             {
                                 <!-- FOR OWNER ONLY -->
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Shop" asp-action="Index">Shops</a>
-                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Item" asp-action="Index">Item</a>
                                 </li>

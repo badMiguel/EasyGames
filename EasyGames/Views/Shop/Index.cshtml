@@ -49,6 +49,7 @@
                 @Html.DisplayFor(modelItem => item.Owner.Id)
             </td>
             <td>
+                <a asp-controller="Inventory" asp-action="Index" asp-route-shopId="@item.ShopId">View Inventory</a> |
                 <a asp-action="Edit" asp-route-id="@item.ShopId">Edit</a> |
                 <a asp-action="Details" asp-route-id="@item.ShopId">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.ShopId">Delete</a>

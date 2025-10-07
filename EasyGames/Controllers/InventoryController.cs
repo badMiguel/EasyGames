@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EasyGames.Controllers
 {
+    [Route("Shop/{shopId}/Inventory")]
     [Authorize(Roles = UserRoles.Owner + "," + UserRoles.ShopProprietor)]
     public class InventoryController : Controller
     {
@@ -23,13 +24,16 @@ namespace EasyGames.Controllers
         }
 
         // GET: Inventory
-        public async Task<IActionResult> Index()
+        [HttpGet("")]
+        public async Task<IActionResult> Index([FromRoute] int shopId)
         {
+            ViewData["ShopId"] = shopId;
             var easyGamesContext = _context.Inventory.Include(i => i.Item).Include(i => i.Shop);
             return View(await easyGamesContext.ToListAsync());
         }
 
         // GET: Inventory/Details/5
+        [HttpGet("{id:int}")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -41,6 +45,7 @@ namespace EasyGames.Controllers
                 .Inventory.Include(i => i.Item)
                 .Include(i => i.Shop)
                 .FirstOrDefaultAsync(m => m.InventoryId == id);
+
             if (inventory == null)
             {
                 return NotFound();
@@ -50,17 +55,20 @@ namespace EasyGames.Controllers
         }
 
         // GET: Inventory/Create
-        public IActionResult Create()
+        [HttpGet("Create")]
+        public IActionResult Create([FromRoute] int ShopId)
         {
-            ViewData["ItemId"] = new SelectList(_context.Item, "ItemId", "Name");
-            ViewData["ShopId"] = new SelectList(_context.Shop, "ShopId", "ShopName");
+            ViewData["ShopId"] = ShopId;
+
+            ViewData["ItemIdList"] = new SelectList(_context.Item, "ItemId", "Name");
+            ViewData["ShopIdList"] = new SelectList(_context.Shop, "ShopId", "ShopName");
             return View();
         }
 
         // POST: Inventory/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost("Create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
             [Bind("InventoryId,ShopId,ItemId,Quantity")] Inventory inventory
@@ -112,6 +120,7 @@ namespace EasyGames.Controllers
         }
 
         // GET: Inventory/Edit/5
+        [HttpGet("Edit/{id:int}")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -137,7 +146,7 @@ namespace EasyGames.Controllers
         // POST: Inventory/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost("Edit/{id:int}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             int id,
@@ -180,6 +189,7 @@ namespace EasyGames.Controllers
         }
 
         // GET: Inventory/Delete/5
+        [HttpGet("Delete/{id:int}")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -200,7 +210,7 @@ namespace EasyGames.Controllers
         }
 
         // POST: Inventory/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost("Delete/{id:int}"), ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -211,7 +221,7 @@ namespace EasyGames.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { shopId = inventory.ShopId });
         }
 
         private bool InventoryExists(int id)

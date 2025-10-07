@@ -7,7 +7,7 @@
 <h1>Index</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-route-shopId="@ViewData["ShopId"]" asp-action="Create">Create New</a>
 </p>
 <table class="table">
     <thead>
@@ -37,11 +37,12 @@
                 @Html.DisplayFor(modelItem => item.Quantity)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.InventoryId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.InventoryId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.InventoryId">Delete</a>
+                <a asp-route-shopId="@item.ShopId" asp-action="Edit" asp-route-id="@item.InventoryId">Edit</a> |
+                <a asp-route-shopId="@item.ShopId" asp-action="Details" asp-route-id="@item.InventoryId">Details</a> |
+                <a asp-route-shopId="@item.ShopId" asp-action="Delete" asp-route-id="@item.InventoryId">Delete</a>
             </td>
         </tr>
 }
     </tbody>
 </table>
+<a asp-controller="Shop" asp-action="Index">Back to Shop List</a>
