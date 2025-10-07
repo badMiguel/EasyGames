@@ -9,32 +9,31 @@
 <div>
     <h4>Inventory</h4>
     <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Shop)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Shop.ShopName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Item)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Item.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SellPrice)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.SellPrice)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Quantity)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Quantity)
-        </dd>
-    </dl>
+
+    <table class="table table-borderless">
+        <tr>
+            <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.Shop)</td>
+            <td class="px-0">@Html.DisplayFor(model => model.Shop.ShopName)</td>
+            <td class="px-0"><a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.ShopId">Visit Shop</a></td>
+        </tr>
+        <tr>
+            <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.Item)</td>
+            <td class="px-0">@Html.DisplayFor(model => model.Item.Name)</td>
+            <td class="px-0"><a asp-controller="Item" asp-action="Details" asp-route-id="@Model.ItemId">Visit Item</a></td>
+        </tr>
+        <tr>
+            <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.Item.BuyPrice)</td>
+            <td class="px-0">@Html.DisplayFor(model => model.Item.BuyPrice)</td>
+        </tr>
+        <tr>
+            <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.SellPrice)</td>
+            <td class="px-0">@Html.DisplayFor(model => model.SellPrice)</td>
+        </tr>
+        <tr>
+            <td class="px-0 col-sm-2 fw-bold">@Html.DisplayNameFor(model => model.Quantity)</td>
+            <td class="px-0">@Html.DisplayFor(model => model.Quantity)</td>
+        </tr>
+    </table>
 </div>
 <div>
     <a asp-route-shopId="@Model.ShopId" asp-action="Edit" asp-route-id="@Model?.InventoryId">Edit</a> |
