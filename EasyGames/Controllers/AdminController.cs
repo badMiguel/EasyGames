@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EasyGames.Controllers;
 
 // Used AI to assist
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = UserRoles.Owner)]
 public class AdminController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
