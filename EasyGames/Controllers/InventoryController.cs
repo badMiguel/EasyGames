@@ -53,7 +53,7 @@ namespace EasyGames.Controllers
         public IActionResult Create()
         {
             ViewData["ItemId"] = new SelectList(_context.Item, "ItemId", "Name");
-            ViewData["ShopId"] = new SelectList(_context.Shop, "ShopId", "ContactNumber");
+            ViewData["ShopId"] = new SelectList(_context.Shop, "ShopId", "ShopName");
             return View();
         }
 
@@ -76,7 +76,7 @@ namespace EasyGames.Controllers
             ViewData["ShopId"] = new SelectList(
                 _context.Shop,
                 "ShopId",
-                "ContactNumber",
+                "ShopName",
                 inventory.ShopId
             );
             return View(inventory);
@@ -99,7 +99,7 @@ namespace EasyGames.Controllers
             ViewData["ShopId"] = new SelectList(
                 _context.Shop,
                 "ShopId",
-                "ContactNumber",
+                "ShopName",
                 inventory.ShopId
             );
             return View(inventory);
@@ -144,7 +144,7 @@ namespace EasyGames.Controllers
             ViewData["ShopId"] = new SelectList(
                 _context.Shop,
                 "ShopId",
-                "ContactNumber",
+                "ShopName",
                 inventory.ShopId
             );
             return View(inventory);

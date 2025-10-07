@@ -13,11 +13,11 @@
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="ShopId" class="control-label"></label>
+                <label asp-for="ShopId" class="control-label">Shop</label>
                 <select asp-for="ShopId" class ="form-control" asp-items="ViewBag.ShopId"></select>
             </div>
             <div class="form-group">
-                <label asp-for="ItemId" class="control-label"></label>
+                <label asp-for="ItemId" class="control-label">Item</label>
                 <select asp-for="ItemId" class ="form-control" asp-items="ViewBag.ItemId"></select>
             </div>
             <div class="form-group">
