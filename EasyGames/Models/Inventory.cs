@@ -15,7 +15,6 @@ public class Inventory
     public int ItemId { get; set; }
     public Item? Item { get; set; }
 
-    [Range(1, 100)]
     [DataType(DataType.Currency)]
     [Display(Name = "Sell Price")]
     [Column(TypeName = "decimal(18,2)")]

@@ -11,7 +11,6 @@ public class Item
     [Required]
     public string? Name { get; set; }
 
-    [Range(1, 100)]
     [DataType(DataType.Currency)]
     [Display(Name = "Buy Price")]
     [Column(TypeName = "decimal(18,2)")]
