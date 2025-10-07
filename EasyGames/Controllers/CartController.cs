@@ -30,7 +30,7 @@ public class CartController : Controller
         }
 
         var orderId = await GetUserOrderId();
-        var unitPrice = await GetUnitPrice(itemDetails.InventoryId) ?? -1;
+        var unitPrice = await GetUnitPrice(itemDetails.Inventory.InventoryId) ?? -1;
         // price cannot be null, raise an error
         if (unitPrice <= -1)
         {
@@ -166,7 +166,7 @@ public class CartController : Controller
         }
 
         var orderId = await GetUserOrderId();
-        var unitPrice = await GetUnitPrice(itemDetails.InventoryId) ?? -1;
+        var unitPrice = await GetUnitPrice(itemDetails.Inventory.InventoryId) ?? -1;
         // price cannot be null, raise an error
         if (unitPrice <= -1)
         {
