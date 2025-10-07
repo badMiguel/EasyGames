@@ -50,7 +50,8 @@ namespace EasyGames.Controllers
         // GET: Shop/Create
         public IActionResult Create()
         {
-            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "Id");
+            ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)), LocationTypes.Physical);
+            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName");
             return View();
         }
 
@@ -86,7 +87,8 @@ namespace EasyGames.Controllers
             {
                 return NotFound();
             }
-            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "Id", shop.OwnerId);
+            ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)));
+            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
             return View(shop);
         }
 
