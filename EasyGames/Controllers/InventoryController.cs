@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using EasyGames.Data;
 using EasyGames.Data;
 using EasyGames.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
 namespace EasyGames.Controllers
 {
+    [Authorize(Roles = UserRoles.Owner + "," + UserRoles.ShopProprietor)]
     public class InventoryController : Controller
     {
         private readonly EasyGamesContext _context;

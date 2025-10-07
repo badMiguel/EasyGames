@@ -29,7 +29,7 @@
                         <div class="dropdown custom-dropdown">
                             <button class="btn dropdown-toggle border-0 shadow-none p-2" type="button" id="dropdownMenuButton"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                Shop
+                                    Products
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <li><a class="dropdown-item" asp-controller="Home" asp-action="Category" asp-route-name="Books">Books</a></li>
@@ -44,9 +44,20 @@
                         </li>
                         
                         @{ 
+                            if (User.IsInRole(UserRoles.Owner) || User.IsInRole(UserRoles.ShopProprietor)) 
+                            {
+                            <!-- FOR OWNER AND SHOP PROPRIETOR ONLY -->
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Inventory" asp-action="Index">Inventory</a>
+                            </li>
+                            }
+
                             if (User.IsInRole(UserRoles.Owner)) 
                             {
-                                <!-- FOR ADMINS ONLY -->
+                                <!-- FOR OWNER ONLY -->
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Shop" asp-action="Index">Shops</a>
+                                </li>
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Item" asp-action="Index">Item</a>
                                 </li>
