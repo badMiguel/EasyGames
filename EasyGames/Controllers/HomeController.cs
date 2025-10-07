@@ -43,7 +43,10 @@ public class HomeController : Controller
 
     // Helper method to get top 3 items from each categories to display on the
     // home page.
-    private async Task GetTopItems(Dictionary<string, List<HomeItemCards>> itemCards, string category)
+    private async Task GetTopItems(
+        Dictionary<string, List<HomeItemCards>> itemCards,
+        string category
+    )
     {
         var getItems = _context
             .Category.Include(c => c.ItemCategories)
@@ -64,7 +67,9 @@ public class HomeController : Controller
                 continue;
 
             var rating = GetRating(item.ItemId);
-            var inventory = await _context.Inventory.FindAsync(item.ItemId);
+            var inventory = await _context.Inventory.FirstOrDefaultAsync(i =>
+                i.ItemId == item.ItemId
+            );
 
             itemList.Add(
                 new HomeItemCards
