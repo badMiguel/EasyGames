@@ -22,24 +22,24 @@ namespace EasyGames.Controllers
             _context = context;
         }
 
-        private async Task<int> GetUnitsSoldByShop(Inventory inventory)
+        private async Task<int> GetUnitsSoldByShop(int inventoryId)
         {
             return await _context
-                .OrderItem.Where(oi => oi.InventoryId == inventory.InventoryId)
+                .OrderItem.Where(oi => oi.InventoryId == inventoryId)
                 .SumAsync(oi => oi.Quantity);
         }
 
-        private async Task<decimal> GetRevenue(Inventory inventory)
+        private async Task<decimal> GetRevenue(int inventoryId)
         {
             return await _context
-                .OrderItem.Where(oi => oi.InventoryId == inventory.InventoryId)
+                .OrderItem.Where(oi => oi.InventoryId == inventoryId)
                 .SumAsync(oi => oi.Quantity * oi.UnitPrice);
         }
 
-        private async Task<decimal> GetProfitGenerated(Inventory inventory)
+        private async Task<decimal> GetProfitGenerated(int inventoryId)
         {
             return await _context
-                .OrderItem.Where(oi => oi.InventoryId == inventory.InventoryId)
+                .OrderItem.Where(oi => oi.InventoryId == inventoryId)
                 .SumAsync(oi => oi.Quantity * (oi.UnitPrice - oi.UnitBuyPrice));
         }
 
@@ -50,11 +50,29 @@ namespace EasyGames.Controllers
             var shop = await _context.Shop.FindAsync(shopId);
             ViewData["ShopName"] = shop.ShopName;
             ViewData["ShopId"] = shopId;
-            var easyGamesContext = _context
+
+            var inventories = await _context
                 .Inventory.Include(i => i.Item)
                 .Include(i => i.Shop)
-                .Where(i => i.ShopId == shopId);
-            return View(await easyGamesContext.ToListAsync());
+                .Where(i => i.ShopId == shopId)
+                .ToListAsync();
+
+            var tasks = inventories
+                .Select(async i => new InventoryDetailViewModel
+                {
+                    InventoryId = i.InventoryId,
+                    ItemId = i.ItemId,
+                    Item = i.Item,
+                    SellPrice = i.SellPrice,
+                    Quantity = i.Quantity,
+                    Revenue = await GetRevenue(i.InventoryId),
+                    TotalUnitsSold = await GetUnitsSoldByShop(i.InventoryId),
+                    ProfitGenerated = await GetProfitGenerated(i.InventoryId),
+                });
+
+            var inventoryDetails = await Task.WhenAll(tasks);
+
+            return View(inventoryDetails);
         }
 
         // GET: Inventory/Details/5
@@ -85,9 +103,9 @@ namespace EasyGames.Controllers
                 ShopId = inventory.ShopId,
                 SellPrice = inventory.SellPrice,
                 Quantity = inventory.Quantity,
-                TotalUnitsSold = await GetUnitsSoldByShop(inventory),
-                Revenue = await GetRevenue(inventory),
-                ProfitGenerated = await GetProfitGenerated(inventory),
+                TotalUnitsSold = await GetUnitsSoldByShop(inventory.InventoryId),
+                Revenue = await GetRevenue(inventory.InventoryId),
+                ProfitGenerated = await GetProfitGenerated(inventory.InventoryId),
             };
 
             return View(inventoryDetails);

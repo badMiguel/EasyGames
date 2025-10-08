@@ -29,6 +29,8 @@ public class InventoryDetailViewModel
     [Display(Name = "Profit Generated")]
     [Column(TypeName = "decimal(18,2)")]
     public decimal ProfitGenerated { get; set; }
+
+    [Display(Name = "Stock")]
     public int Quantity { get; set; }
 
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();

@@ -20,6 +20,7 @@ public class Inventory
     [Column(TypeName = "decimal(18,2)")]
     public decimal SellPrice { get; set; }
 
+    [Display(Name = "Stock")]
     public int Quantity { get; set; }
 
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
