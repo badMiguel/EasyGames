@@ -81,9 +81,9 @@
                 @Html.DisplayFor(modelItem => item.Quantity)
             </td>
             <td class="text-end">
-                <a class="btn btn-sm btn-outline-primary" asp-route-shopId="@item.ShopId" asp-action="Edit" asp-route-id="@item.InventoryId">Edit</a>
-                <a class="btn btn-sm btn-outline-info" asp-route-shopId="@item.ShopId" asp-action="Details" asp-route-id="@item.InventoryId">Details</a>
-                <a class="btn btn-sm btn-outline-danger" asp-route-shopId="@item.ShopId" asp-action="Delete" asp-route-id="@item.InventoryId">Delete</a>
+                <a class="btn btn-sm btn-outline-primary" asp-route-shopId="@Model.ShopId" asp-action="Edit" asp-route-id="@item.InventoryId">Edit</a>
+                <a class="btn btn-sm btn-outline-info" asp-route-shopId="@Model.ShopId" asp-action="Details" asp-route-id="@item.InventoryId">Details</a>
+                <a class="btn btn-sm btn-outline-danger" asp-route-shopId="@Model.ShopId" asp-action="Delete" asp-route-id="@item.InventoryId">Delete</a>
             </td>
         </tr>
     }}

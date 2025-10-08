@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using EasyGames.Data;
 using EasyGames.Models;
@@ -20,6 +21,22 @@ namespace EasyGames.Controllers
         public InventoryController(EasyGamesContext context)
         {
             _context = context;
+        }
+
+        private bool IsOwnerOfShop(int? shopId)
+        {
+            if (shopId == null)
+                return false;
+            if (User.IsInRole(UserRoles.Owner))
+                return true;
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (_context.Shop.Find(shopId)?.OwnerId == userId)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private async Task<int> GetUnitsSoldByShop(int inventoryId)
@@ -69,6 +86,9 @@ namespace EasyGames.Controllers
                 .Where(i => i.ShopId == shopId)
                 .ToListAsync();
 
+            if (!IsOwnerOfShop(inventories.Select(i => i.ShopId).FirstOrDefault()))
+                return Forbid();
+
             var tasks = inventories.Select(async i => new InventoryDetailViewModel
             {
                 InventoryId = i.InventoryId,
@@ -109,6 +129,9 @@ namespace EasyGames.Controllers
                 .Include(i => i.Shop)
                 .FirstOrDefaultAsync(m => m.InventoryId == id);
 
+            if (!IsOwnerOfShop(inventory?.ShopId))
+                return Forbid();
+
             if (inventory == null)
             {
                 return NotFound();
@@ -135,6 +158,9 @@ namespace EasyGames.Controllers
         [HttpGet("Create")]
         public IActionResult Create([FromRoute] int shopId)
         {
+            if (!IsOwnerOfShop(shopId))
+                return Forbid();
+
             ViewData["ShopId"] = shopId;
 
             ViewData["ItemIdList"] = new SelectList(_context.Item, "ItemId", "Name");
@@ -151,6 +177,9 @@ namespace EasyGames.Controllers
             [Bind("InventoryId,ShopId,ItemId,SellPrice,Quantity")] Inventory inventory
         )
         {
+            if (!IsOwnerOfShop(inventory.ShopId))
+                return Forbid();
+
             if (ModelState.IsValid)
             {
                 var inventoryOfItem = await _context
@@ -217,6 +246,10 @@ namespace EasyGames.Controllers
             {
                 return NotFound();
             }
+
+            if (!IsOwnerOfShop(inventory.ShopId))
+                return Forbid();
+
             ViewData["ItemIdList"] = new SelectList(
                 _context.Item,
                 "ItemId",
@@ -246,6 +279,9 @@ namespace EasyGames.Controllers
             {
                 return NotFound();
             }
+
+            if (!IsOwnerOfShop(inventory.ShopId))
+                return Forbid();
 
             if (ModelState.IsValid)
             {
@@ -334,6 +370,9 @@ namespace EasyGames.Controllers
                 return NotFound();
             }
 
+            if (!IsOwnerOfShop(inventory.ShopId))
+                return Forbid();
+
             return View(inventory);
         }
 
@@ -343,6 +382,9 @@ namespace EasyGames.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var inventory = await _context.Inventory.FindAsync(id);
+            if (!IsOwnerOfShop(inventory.ShopId))
+                return Forbid();
+
             if (inventory != null)
             {
                 _context.Inventory.Remove(inventory);

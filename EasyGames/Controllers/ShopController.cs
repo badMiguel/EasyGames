@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using EasyGames.Data;
 using EasyGames.Models;
@@ -21,6 +22,22 @@ namespace EasyGames.Controllers
             _context = context;
         }
 
+        private bool IsOwnerOfShop(int? shopId)
+        {
+            if (shopId == null)
+                return false;
+            if (User.IsInRole(UserRoles.Owner))
+                return true;
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (_context.Shop.Find(shopId)?.OwnerId == userId)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         // GET: Shop
         public async Task<IActionResult> Index()
         {
@@ -35,6 +52,9 @@ namespace EasyGames.Controllers
             {
                 return NotFound();
             }
+
+            if (!IsOwnerOfShop(id))
+                return Forbid();
 
             var shop = await _context
                 .Shop.Include(s => s.Owner)
@@ -85,6 +105,9 @@ namespace EasyGames.Controllers
                 return NotFound();
             }
 
+            if (!IsOwnerOfShop(id))
+                return Forbid();
+
             var shop = await _context.Shop.FindAsync(id);
             if (shop == null)
             {
@@ -109,6 +132,9 @@ namespace EasyGames.Controllers
             {
                 return NotFound();
             }
+
+            if (!IsOwnerOfShop(id))
+                return Forbid();
 
             if (ModelState.IsValid)
             {
@@ -142,6 +168,9 @@ namespace EasyGames.Controllers
                 return NotFound();
             }
 
+            if (!IsOwnerOfShop(id))
+                return Forbid();
+
             var shop = await _context
                 .Shop.Include(s => s.Owner)
                 .FirstOrDefaultAsync(m => m.ShopId == id);
@@ -158,6 +187,9 @@ namespace EasyGames.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (!IsOwnerOfShop(id))
+                return Forbid();
+
             var shop = await _context.Shop.FindAsync(id);
             if (shop != null)
             {
