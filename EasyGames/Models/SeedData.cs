@@ -343,7 +343,7 @@ public static class SeedData
                             ShopId = newShops[0].ShopId,
                             CustomerId = c.CustomerId,
                             Status = OrderStatus.Ordered,
-                            OrderDate = DateTime.UtcNow.Date,
+                            OrderDate = DateTime.UtcNow,
                         }
                     );
                     physicalOrder.Add(
@@ -352,7 +352,7 @@ public static class SeedData
                             ShopId = newShops[1].ShopId,
                             CustomerId = c.CustomerId,
                             Status = OrderStatus.Ordered,
-                            OrderDate = DateTime.UtcNow.Date,
+                            OrderDate = DateTime.UtcNow,
                         }
                     );
                 }

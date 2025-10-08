@@ -285,7 +285,7 @@ public class CartController : Controller
         if (order != null)
         {
             order.Status = OrderStatus.Ordered;
-            order.OrderDate = DateTime.UtcNow.Date;
+            order.OrderDate = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
             await DecrementStockAmount(orderId);
