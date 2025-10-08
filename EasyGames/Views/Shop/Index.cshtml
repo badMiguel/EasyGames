@@ -1,3 +1,4 @@
+@using System.Security.Claims
 @model IEnumerable<EasyGames.Models.Shop>
 
 @{
@@ -26,6 +27,8 @@
     </thead>
     <tbody>
 @foreach (var item in Model) {
+    if (User.IsInRole(UserRoles.Owner))
+    {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.ShopName)
@@ -43,6 +46,28 @@
                 <a asp-action="Delete" asp-route-id="@item.ShopId">Delete</a>
             </td>
         </tr>
+        continue;
+    }
+
+    if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == item.OwnerId) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ShopName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.LocationType)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Owner.UserName)
+            </td>
+            <td>
+                <a asp-controller="Inventory" asp-action="Index" asp-route-shopId="@item.ShopId">View Inventory</a> |
+                <a asp-action="Edit" asp-route-id="@item.ShopId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.ShopId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.ShopId">Delete</a>
+            </td>
+        </tr>
+    }
 }
     </tbody>
 </table>

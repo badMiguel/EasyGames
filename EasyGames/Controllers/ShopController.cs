@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EasyGames.Controllers
 {
-    [Authorize(Roles = UserRoles.Owner)]
+    [Authorize(Roles = UserRoles.Owner + "," + UserRoles.ShopProprietor)]
     public class ShopController : Controller
     {
         private readonly EasyGamesContext _context;
@@ -50,7 +50,10 @@ namespace EasyGames.Controllers
         // GET: Shop/Create
         public IActionResult Create()
         {
-            ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)), LocationTypes.Physical);
+            ViewData["LocationType"] = new SelectList(
+                Enum.GetValues(typeof(LocationTypes)),
+                LocationTypes.Physical
+            );
             ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName");
             return View();
         }
