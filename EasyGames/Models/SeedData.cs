@@ -118,6 +118,7 @@ public static class SeedData
 
             if (!context.Shop.Any())
             {
+                // Seed Shops
                 var newShops = new List<Shop>
                 {
                     new Shop
@@ -139,15 +140,19 @@ public static class SeedData
                 context.Shop.AddRange(newShops);
                 await context.SaveChangesAsync();
 
-                context.Customer.AddRange(
+                // Seed Customer
+                List<Customer> customers = new List<Customer>
+                {
                     new Customer { UserId = newCustomer.Id, IsGuest = false },
                     new Customer { UserId = newOwner.Id, IsGuest = false },
                     new Customer { UserId = newShopProprietor.Id, IsGuest = false },
-                    new Customer { IsGuest = true }
-                );
+                    new Customer { IsGuest = true },
+                };
+                context.Customer.AddRange(customers);
                 await context.SaveChangesAsync();
 
                 // Data generated with AI
+                // Seed Items
                 var newItems = new List<Item>
                 {
                     new Item
@@ -217,6 +222,7 @@ public static class SeedData
                 context.Item.AddRange(newItems);
                 await context.SaveChangesAsync();
 
+                // Seed Item Categories
                 context.ItemCategory.AddRange(
                     new ItemCategory { ItemId = newItems[0].ItemId, CategoryId = books.CategoryId },
                     new ItemCategory { ItemId = newItems[1].ItemId, CategoryId = books.CategoryId },
@@ -230,6 +236,7 @@ public static class SeedData
                 );
                 await context.SaveChangesAsync();
 
+                // Seed Reviews
                 var newReviews = new List<Review>
                 {
                     new Review
@@ -296,25 +303,99 @@ public static class SeedData
                 context.Review.AddRange(newReviews);
                 await context.SaveChangesAsync();
 
+                // Seed Inventory
                 Random rnd = new Random();
+                List<Inventory> onlineInventory = new List<Inventory> { };
+                List<Inventory> physicalInventory = new List<Inventory> { };
                 foreach (var item in newItems)
                 {
-                    context.Inventory.AddRange(
+                    onlineInventory.Add(
                         new Inventory
                         {
                             ItemId = item.ItemId,
                             ShopId = newShops[0].ShopId,
-                            Quantity = rnd.Next(1, 101),
+                            Quantity = rnd.Next(50, 501),
                             SellPrice = item.BuyPrice + rnd.Next(1, 10),
-                        },
+                        }
+                    );
+                    physicalInventory.Add(
                         new Inventory
                         {
                             ItemId = item.ItemId,
                             ShopId = newShops[1].ShopId,
-                            Quantity = rnd.Next(1, 101),
+                            Quantity = rnd.Next(50, 301),
                             SellPrice = item.BuyPrice + rnd.Next(1, 10),
                         }
                     );
+                }
+                context.Inventory.AddRange(onlineInventory);
+                context.Inventory.AddRange(physicalInventory);
+                await context.SaveChangesAsync();
+
+                // Seed Order
+                List<Order> onlineOrder = new List<Order> { };
+                List<Order> physicalOrder = new List<Order> { };
+                foreach (var c in customers)
+                {
+                    onlineOrder.Add(
+                        new Order
+                        {
+                            ShopId = newShops[0].ShopId,
+                            CustomerId = c.CustomerId,
+                            Status = OrderStatus.Ordered,
+                            OrderDate = DateTime.UtcNow.Date,
+                        }
+                    );
+                    physicalOrder.Add(
+                        new Order
+                        {
+                            ShopId = newShops[1].ShopId,
+                            CustomerId = c.CustomerId,
+                            Status = OrderStatus.Ordered,
+                            OrderDate = DateTime.UtcNow.Date,
+                        }
+                    );
+                }
+                context.Order.AddRange(onlineOrder);
+                context.Order.AddRange(physicalOrder);
+                await context.SaveChangesAsync();
+
+                // Seed OrderItem
+                foreach (var order in onlineOrder)
+                {
+                    foreach (var inventory in onlineInventory)
+                    {
+                        context.OrderItem.Add(
+                            new OrderItem
+                            {
+                                OrderId = order.OrderId,
+                                Quantity = rnd.Next(1, 15),
+                                InventoryId = inventory.InventoryId,
+                                UnitPrice = inventory.SellPrice,
+                                UnitBuyPrice = newItems
+                                    .First(i => i.ItemId == inventory.ItemId)
+                                    .BuyPrice,
+                            }
+                        );
+                    }
+                }
+                foreach (var order in physicalOrder)
+                {
+                    foreach (var inventory in physicalInventory)
+                    {
+                        context.OrderItem.Add(
+                            new OrderItem
+                            {
+                                OrderId = order.OrderId,
+                                Quantity = rnd.Next(1, 15),
+                                InventoryId = inventory.InventoryId,
+                                UnitPrice = inventory.SellPrice,
+                                UnitBuyPrice = newItems
+                                    .First(i => i.ItemId == inventory.ItemId)
+                                    .BuyPrice,
+                            }
+                        );
+                    }
                 }
 
                 await context.SaveChangesAsync();
