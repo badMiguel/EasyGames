@@ -29,17 +29,31 @@ namespace EasyGames.Controllers
                 .SumAsync(oi => oi.Quantity);
         }
 
-        private async Task<decimal> GetRevenue(int inventoryId)
+        private async Task<decimal> GetItemRevenue(int inventoryId)
         {
             return await _context
                 .OrderItem.Where(oi => oi.InventoryId == inventoryId)
                 .SumAsync(oi => oi.Quantity * oi.UnitPrice);
         }
 
-        private async Task<decimal> GetProfitGenerated(int inventoryId)
+        private async Task<decimal> GetShopRevenue(int shopId)
+        {
+            return await _context
+                .OrderItem.Where(oi => oi.Inventory.ShopId == shopId)
+                .SumAsync(oi => oi.Quantity * oi.UnitPrice);
+        }
+
+        private async Task<decimal> GetItemProfit(int inventoryId)
         {
             return await _context
                 .OrderItem.Where(oi => oi.InventoryId == inventoryId)
+                .SumAsync(oi => oi.Quantity * (oi.UnitPrice - oi.UnitBuyPrice));
+        }
+
+        private async Task<decimal> GetShopProfit(int shopId)
+        {
+            return await _context
+                .OrderItem.Where(oi => oi.Inventory.ShopId == shopId)
                 .SumAsync(oi => oi.Quantity * (oi.UnitPrice - oi.UnitBuyPrice));
         }
 
@@ -48,8 +62,6 @@ namespace EasyGames.Controllers
         public async Task<IActionResult> Index([FromRoute] int shopId)
         {
             var shop = await _context.Shop.FindAsync(shopId);
-            ViewData["ShopName"] = shop.ShopName;
-            ViewData["ShopId"] = shopId;
 
             var inventories = await _context
                 .Inventory.Include(i => i.Item)
@@ -57,22 +69,30 @@ namespace EasyGames.Controllers
                 .Where(i => i.ShopId == shopId)
                 .ToListAsync();
 
-            var tasks = inventories
-                .Select(async i => new InventoryDetailViewModel
-                {
-                    InventoryId = i.InventoryId,
-                    ItemId = i.ItemId,
-                    Item = i.Item,
-                    SellPrice = i.SellPrice,
-                    Quantity = i.Quantity,
-                    Revenue = await GetRevenue(i.InventoryId),
-                    TotalUnitsSold = await GetUnitsSoldByShop(i.InventoryId),
-                    ProfitGenerated = await GetProfitGenerated(i.InventoryId),
-                });
+            var tasks = inventories.Select(async i => new InventoryDetailViewModel
+            {
+                InventoryId = i.InventoryId,
+                ItemId = i.ItemId,
+                Item = i.Item,
+                SellPrice = i.SellPrice,
+                Quantity = i.Quantity,
+                Revenue = await GetItemRevenue(i.InventoryId),
+                TotalUnitsSold = await GetUnitsSoldByShop(i.InventoryId),
+                ProfitGenerated = await GetItemProfit(i.InventoryId),
+            });
 
-            var inventoryDetails = await Task.WhenAll(tasks);
+            var inventoryItems = await Task.WhenAll(tasks);
 
-            return View(inventoryDetails);
+            var inventoryIndex = new InventoryIndexViewModel
+            {
+                ShopId = shopId,
+                ShopName = shop!.ShopName,
+                TotalProfit = await GetShopProfit(shopId),
+                TotalRevenue = await GetShopRevenue(shopId),
+                InventoryItems = inventoryItems,
+            };
+
+            return View(inventoryIndex);
         }
 
         // GET: Inventory/Details/5
@@ -104,8 +124,8 @@ namespace EasyGames.Controllers
                 SellPrice = inventory.SellPrice,
                 Quantity = inventory.Quantity,
                 TotalUnitsSold = await GetUnitsSoldByShop(inventory.InventoryId),
-                Revenue = await GetRevenue(inventory.InventoryId),
-                ProfitGenerated = await GetProfitGenerated(inventory.InventoryId),
+                Revenue = await GetItemRevenue(inventory.InventoryId),
+                ProfitGenerated = await GetItemProfit(inventory.InventoryId),
             };
 
             return View(inventoryDetails);
