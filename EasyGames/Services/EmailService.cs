@@ -13,7 +13,7 @@ public class SmtpSettings
 
 public interface IEmailService
 {
-    Task SendEmailAsync(IEnumerable<string> toList, string subject, string body);
+    Task SendEmailAsync(IEnumerable<string?> toList, string subject, string body);
 }
 
 public class SmtpEmailService : IEmailService
@@ -25,7 +25,7 @@ public class SmtpEmailService : IEmailService
         _settings = settings.Value;
     }
 
-    public async Task SendEmailAsync(IEnumerable<string> toList, string subject, string body)
+    public async Task SendEmailAsync(IEnumerable<string?> toList, string subject, string body)
     {
         if (!toList.Any())
         {
@@ -37,7 +37,10 @@ public class SmtpEmailService : IEmailService
         message.To.Add(new MailAddress(_settings.From));
         foreach (var to in toList)
         {
-            message.Bcc.Add(new MailAddress(to));
+            if (to != null)
+            {
+                message.Bcc.Add(new MailAddress(to));
+            }
         }
         message.Subject = subject;
         message.IsBodyHtml = true;
