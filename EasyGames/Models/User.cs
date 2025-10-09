@@ -11,6 +11,26 @@ public static class UserRoles
     public static readonly string[] AllRoles = { Owner, ShopProprietor, Customer };
 }
 
+public static class UserStatus
+{
+    public const string Platinum = "Platinum";
+    public const string Gold = "Gold";
+    public const string Silver = "Silver";
+    public const string Bronze = "Bronze";
+
+    public static readonly string[] AllStatus = { Platinum, Gold, Silver, Bronze };
+}
+
+public static class StatusPoints
+{
+    public const int Bronze = 500;
+    public const int Silver = 1_000;
+    public const int Gold = 5_000;
+    public const int Platinum = 10_000;
+
+    public static readonly int[] AllPoints = { Bronze, Silver, Gold, Platinum };
+}
+
 public class ApplicationUser : IdentityUser
 {
     public int AccountPoints { get; set; }
@@ -23,22 +43,17 @@ public class ApplicationUser : IdentityUser
 
     public Customer? Customer { get; set; }
 
-    public const int BronzePoints = 500;
-    public const int SilverPoints = 1_000;
-    public const int GoldPoints = 5_000;
-    public const int PlatinumPoints = 10_000;
-
-    public string AccountStatus
+    public string Status
     {
         get
         {
-            if (AccountPoints >= PlatinumPoints)
-                return "Platinum";
-            if (AccountPoints >= GoldPoints)
-                return "Gold";
-            if (AccountPoints >= SilverPoints)
-                return "Silver";
-            return "Bronze";
+            if (AccountPoints >= StatusPoints.Platinum)
+                return UserStatus.Platinum;
+            if (AccountPoints >= StatusPoints.Gold)
+                return UserStatus.Gold;
+            if (AccountPoints >= StatusPoints.Silver)
+                return UserStatus.Silver;
+            return UserStatus.Bronze;
         }
     }
 }
