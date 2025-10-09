@@ -42,18 +42,4 @@ public class ApplicationUser : IdentityUser
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public Customer? Customer { get; set; }
-
-    public string Status
-    {
-        get
-        {
-            if (AccountPoints >= StatusPoints.Platinum)
-                return UserStatus.Platinum;
-            if (AccountPoints >= StatusPoints.Gold)
-                return UserStatus.Gold;
-            if (AccountPoints >= StatusPoints.Silver)
-                return UserStatus.Silver;
-            return UserStatus.Bronze;
-        }
-    }
 }
