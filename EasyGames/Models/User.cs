@@ -17,8 +17,9 @@ public static class UserStatus
     public const string Gold = "Gold";
     public const string Silver = "Silver";
     public const string Bronze = "Bronze";
+    public const string Unranked = "Unranked";
 
-    public static readonly string[] AllStatus = { Platinum, Gold, Silver, Bronze };
+    public static readonly string[] AllStatus = { Platinum, Gold, Silver, Bronze, Unranked };
 }
 
 public static class StatusPoints

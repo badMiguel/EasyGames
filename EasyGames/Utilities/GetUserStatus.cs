@@ -12,6 +12,8 @@ public static class UserStatusHelper
             return UserStatus.Gold;
         if (accountPoints >= StatusPoints.Silver)
             return UserStatus.Silver;
-        return UserStatus.Bronze;
+        if (accountPoints >= StatusPoints.Bronze)
+            return UserStatus.Bronze;
+        return UserStatus.Unranked;
     }
 }
