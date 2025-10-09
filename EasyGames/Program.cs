@@ -32,6 +32,10 @@ builder
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// For email service
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
+builder.Services.AddTransient<IEmailService, SmtpEmailService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
