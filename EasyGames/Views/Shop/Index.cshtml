@@ -10,6 +10,9 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+@await Html.PartialAsync("_PageSizeSelector", ViewData["PageDetails"])
+
 <table class="table">
     <thead>
         <tr>
@@ -71,3 +74,5 @@
 }
     </tbody>
 </table>
+
+@await Html.PartialAsync("_MovePagePartial", ViewData["PageDetails"])

@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using EasyGames.Data;
 using EasyGames.Models;
+using EasyGames.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -39,10 +40,18 @@ namespace EasyGames.Controllers
         }
 
         // GET: Shop
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? pageNumber, int? pageSize)
         {
-            var easyGamesContext = _context.Shop.Include(s => s.Owner);
-            return View(await easyGamesContext.ToListAsync());
+            var shop = _context.Shop.Include(s => s.Owner).AsNoTracking();
+            var paginatedShop = await Pagination<Shop>.CreateAsync(shop, pageNumber, pageSize);
+            ViewData["PageDetails"] = new PageDetails
+            {
+                PageSize = paginatedShop.PageSize,
+                PageIndex = paginatedShop.PageIndex,
+                HasNextPage = paginatedShop.HasNextPage,
+                HasPreviousPage = paginatedShop.HasPreviousPage,
+            };
+            return View(paginatedShop);
         }
 
         // GET: Shop/Details/5
