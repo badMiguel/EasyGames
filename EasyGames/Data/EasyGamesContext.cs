@@ -20,6 +20,9 @@ public class EasyGamesContext : IdentityDbContext<ApplicationUser>
     public DbSet<EasyGames.Models.Review> Review { get; set; } = default!;
     public DbSet<EasyGames.Models.Order> Order { get; set; } = default!;
     public DbSet<EasyGames.Models.OrderItem> OrderItem { get; set; } = default!;
+    public DbSet<EasyGames.Models.Shop> Shop { get; set; } = default!;
+    public DbSet<EasyGames.Models.Inventory> Inventory { get; set; } = default!;
+    public DbSet<EasyGames.Models.Customer> Customer { get; set; } = default!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

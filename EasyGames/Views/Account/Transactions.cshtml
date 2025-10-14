@@ -1,0 +1,36 @@
+@model IEnumerable<EasyGames.Models.UserTransactionViewModel>
+
+@{
+    ViewData["Title"] = "Transaction History";
+}
+
+<h1 class="mb-4">Transaction History</h1>
+
+@foreach (var transaction in Model)
+{
+    <div class="d-flex align-items-end mb-3">
+        <p class="fw-bold fs-5 m-0 lh-1 me-2">@transaction.Order?.OrderDate?.ToString("d MMM yyyy")</p>
+        <small class="text-muted m-0 lh-1">@transaction.Order?.OrderDate?.ToString("hh:mm tt")</small>
+    </div>
+
+    <div class="mb-3">
+        @foreach (var orderItem in transaction.OrderItems)
+        {
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="fw-semibold">@orderItem.Inventory?.Item?.Name</div>
+                    <small class="text-muted">Qty: @orderItem.Quantity</small>
+                </div>
+                <div class="text-end">
+                    <div>@orderItem.UnitPrice.ToString("C") each</div>
+                    <div class="small text-muted">Subtotal: @((orderItem.UnitPrice * orderItem.Quantity).ToString("C"))</div>
+                </div>
+            </div>
+        }
+        <div class="d-flex justify-content-end mt-2">
+            <div class="fw-bold">Total: @transaction.TotalCost.ToString("C")</div>
+        </div>
+    </div>
+
+    <hr />
+}

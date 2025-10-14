@@ -4,6 +4,7 @@ using System.Security.Claims;
 using EasyGames.Data;
 using EasyGames.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 public class CartSummaryViewComponent : ViewComponent
 {
@@ -19,13 +20,30 @@ public class CartSummaryViewComponent : ViewComponent
         _httpContextAccessor = httpContextAccessor;
     }
 
-    private int GetUserOrderId()
+    private async Task<Customer?> GetCustomer()
     {
         var user = _httpContextAccessor.HttpContext?.User;
         var loggedInUserId = user?.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (loggedInUserId != null)
+        {
+            var getCustomer = await _context.Customer.FirstOrDefaultAsync(c =>
+                c.UserId == loggedInUserId
+            );
+            return getCustomer;
+        }
+        return null;
+    }
+
+    private async Task<int> GetUserOrderId()
+    {
+        var customer = await GetCustomer();
+        if (customer == null)
+        {
+            return -1;
+        }
 
         var order = _context.Order.FirstOrDefault(o =>
-            o.Status == OrderStatus.InCart && o.UserId == loggedInUserId
+            o.Status == OrderStatus.InCart && o.CustomerId == customer.CustomerId
         );
 
         if (order == null)
@@ -37,7 +55,7 @@ public class CartSummaryViewComponent : ViewComponent
 
     public async Task<IViewComponentResult> InvokeAsync()
     {
-        var orderId = GetUserOrderId();
+        var orderId = await GetUserOrderId();
         if (orderId <= -1)
         {
             return View(0);

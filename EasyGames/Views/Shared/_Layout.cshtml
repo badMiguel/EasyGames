@@ -29,7 +29,7 @@
                         <div class="dropdown custom-dropdown">
                             <button class="btn dropdown-toggle border-0 shadow-none p-2" type="button" id="dropdownMenuButton"
                                 data-bs-toggle="dropdown" aria-expanded="false">
-                                Shop
+                                    Products
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <li><a class="dropdown-item" asp-controller="Home" asp-action="Category" asp-route-name="Books">Books</a></li>
@@ -44,24 +44,39 @@
                         </li>
                         
                         @{ 
-                            if (User.IsInRole("Admin")) 
+                            if (User.IsInRole(UserRoles.Owner) || User.IsInRole(UserRoles.ShopProprietor)) 
                             {
-                                <!-- FOR ADMINS ONLY -->
+                            <!-- FOR OWNER AND SHOP PROPRIETOR ONLY -->
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Item" asp-action="Index">Item</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Shop" asp-action="Index">Shops</a>
                                 </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="ItemCategory"
-                                        asp-action="Index">Item Category</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Category"
-                                        asp-action="Index">Category</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="Index">User
-                                        Manager</a>
-                                </li>
+                            }
+
+                            if (User.IsInRole(UserRoles.Owner)) 
+                            {
+                                <!-- FOR OWNER ONLY -->
+                                <div class="dropdown custom-dropdown">
+                                    <button class="btn dropdown-toggle border-0 shadow-none p-2" type="button" id="dropdownMenuButton"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        Items
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <li><a class="dropdown-item" asp-controller="Item" asp-action="Index">Item Manager</a></li>
+                                        <li><a class="dropdown-item" asp-controller="ItemCategory" asp-action="Index">Item Category Manager</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Category" asp-action="Index">Category Manager</a></li>
+                                    </ul>
+                                </div>
+                                <div class="dropdown custom-dropdown">
+                                    <button class="btn dropdown-toggle border-0 shadow-none p-2" type="button" id="dropdownMenuButton"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                            Users
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Index">User Manager</a></li>
+                                        <li><a class="dropdown-item" asp-controller="UserSales" asp-action="Index">User Sales</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Email" asp-action="Index">Email Users</a></li>
+                                    </ul>
+                                </div>
                             }
                         }
                     </ul>

@@ -1,16 +1,17 @@
-using EasyGames.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EasyGames.Data;
+using EasyGames.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using EasyGames.Data;
-using EasyGames.Models;
 
 namespace EasyGames.Controllers
 {
+    [Authorize(Roles = UserRoles.Owner)]
     public class ItemCategoryController : Controller
     {
         private readonly EasyGamesContext _context;
@@ -23,7 +24,9 @@ namespace EasyGames.Controllers
         // GET: ItemCategory
         public async Task<IActionResult> Index()
         {
-            var easyGamesContext = _context.ItemCategory.Include(i => i.Category).Include(i => i.Item);
+            var easyGamesContext = _context
+                .ItemCategory.Include(i => i.Category)
+                .Include(i => i.Item);
             return View(await easyGamesContext.ToListAsync());
         }
 
@@ -35,8 +38,8 @@ namespace EasyGames.Controllers
                 return NotFound();
             }
 
-            var itemCategory = await _context.ItemCategory
-                .Include(i => i.Category)
+            var itemCategory = await _context
+                .ItemCategory.Include(i => i.Category)
                 .Include(i => i.Item)
                 .FirstOrDefaultAsync(m => m.ItemCategoryId == id);
             if (itemCategory == null)
@@ -60,7 +63,9 @@ namespace EasyGames.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ItemCategoryId,ItemId,CategoryId")] ItemCategory itemCategory)
+        public async Task<IActionResult> Create(
+            [Bind("ItemCategoryId,ItemId,CategoryId")] ItemCategory itemCategory
+        )
         {
             if (ModelState.IsValid)
             {
@@ -68,8 +73,18 @@ namespace EasyGames.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "Name", itemCategory.CategoryId);
-            ViewData["ItemId"] = new SelectList(_context.Item, "ItemId", "Name", itemCategory.ItemId);
+            ViewData["CategoryId"] = new SelectList(
+                _context.Category,
+                "CategoryId",
+                "Name",
+                itemCategory.CategoryId
+            );
+            ViewData["ItemId"] = new SelectList(
+                _context.Item,
+                "ItemId",
+                "Name",
+                itemCategory.ItemId
+            );
             return View(itemCategory);
         }
 
@@ -86,8 +101,18 @@ namespace EasyGames.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "Name", itemCategory.CategoryId);
-            ViewData["ItemId"] = new SelectList(_context.Item, "ItemId", "Name", itemCategory.ItemId);
+            ViewData["CategoryId"] = new SelectList(
+                _context.Category,
+                "CategoryId",
+                "Name",
+                itemCategory.CategoryId
+            );
+            ViewData["ItemId"] = new SelectList(
+                _context.Item,
+                "ItemId",
+                "Name",
+                itemCategory.ItemId
+            );
             return View(itemCategory);
         }
 
@@ -96,7 +121,10 @@ namespace EasyGames.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ItemCategoryId,ItemId,CategoryId")] ItemCategory itemCategory)
+        public async Task<IActionResult> Edit(
+            int id,
+            [Bind("ItemCategoryId,ItemId,CategoryId")] ItemCategory itemCategory
+        )
         {
             if (id != itemCategory.ItemCategoryId)
             {
@@ -123,8 +151,18 @@ namespace EasyGames.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "Name", itemCategory.CategoryId);
-            ViewData["ItemId"] = new SelectList(_context.Item, "ItemId", "Name", itemCategory.ItemId);
+            ViewData["CategoryId"] = new SelectList(
+                _context.Category,
+                "CategoryId",
+                "Name",
+                itemCategory.CategoryId
+            );
+            ViewData["ItemId"] = new SelectList(
+                _context.Item,
+                "ItemId",
+                "Name",
+                itemCategory.ItemId
+            );
             return View(itemCategory);
         }
 
@@ -136,8 +174,8 @@ namespace EasyGames.Controllers
                 return NotFound();
             }
 
-            var itemCategory = await _context.ItemCategory
-                .Include(i => i.Category)
+            var itemCategory = await _context
+                .ItemCategory.Include(i => i.Category)
                 .Include(i => i.Item)
                 .FirstOrDefaultAsync(m => m.ItemCategoryId == id);
             if (itemCategory == null)

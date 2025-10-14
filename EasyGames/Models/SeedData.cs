@@ -20,7 +20,7 @@ public static class SeedData
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         {
             // ---- FOR USERS ----
-            foreach (var role in new[] { "Admin", "User" })
+            foreach (var role in UserRoles.AllRoles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
                 {
@@ -28,46 +28,68 @@ public static class SeedData
                 }
             }
 
-            var adminEmail = "admin@email.com";
-            var userEmail = "user@email.com";
-            var admin = await userManager.FindByEmailAsync(adminEmail);
-            var user = await userManager.FindByEmailAsync(userEmail);
+            var ownerEmail = "owner@email.com";
+            var shopProprietorEmail = "shop@email.com";
+            var customerEmail = "customer@email.com";
 
-            var newUser = new ApplicationUser
+            var owner = await userManager.FindByEmailAsync(ownerEmail);
+            var shopProprietor = await userManager.FindByEmailAsync(shopProprietorEmail);
+            var customer = await userManager.FindByEmailAsync(customerEmail);
+
+            var newCustomer = new ApplicationUser
             {
-                UserName = userEmail,
-                Email = userEmail,
+                UserName = customerEmail,
+                Email = customerEmail,
                 EmailConfirmed = true,
             };
-            if (user == null)
+            if (customer == null)
             {
-                await userManager.CreateAsync(newUser, "User123.");
-                await userManager.AddToRoleAsync(newUser, "User");
+                await userManager.CreateAsync(newCustomer, "Customer123.");
+                await userManager.AddToRoleAsync(newCustomer, UserRoles.Customer);
             }
             else
             {
-                if (!await userManager.IsInRoleAsync(user, "User"))
+                if (!await userManager.IsInRoleAsync(customer, UserRoles.Customer))
                 {
-                    await userManager.AddToRoleAsync(user, "User");
+                    await userManager.AddToRoleAsync(customer, UserRoles.Customer);
                 }
             }
 
-            var newAdmin = new ApplicationUser
+            var newShopProprietor = new ApplicationUser
             {
-                UserName = adminEmail,
-                Email = adminEmail,
+                UserName = shopProprietorEmail,
+                Email = shopProprietorEmail,
                 EmailConfirmed = true,
             };
-            if (admin == null)
+            if (shopProprietor == null)
             {
-                await userManager.CreateAsync(newAdmin, "Admin123.");
-                await userManager.AddToRoleAsync(newAdmin, "Admin");
+                await userManager.CreateAsync(newShopProprietor, "Shop123.");
+                await userManager.AddToRoleAsync(newShopProprietor, UserRoles.ShopProprietor);
             }
             else
             {
-                if (!await userManager.IsInRoleAsync(admin, "Admin"))
+                if (!await userManager.IsInRoleAsync(newShopProprietor, UserRoles.ShopProprietor))
                 {
-                    await userManager.AddToRoleAsync(admin, "Admin");
+                    await userManager.AddToRoleAsync(newShopProprietor, UserRoles.ShopProprietor);
+                }
+            }
+
+            var newOwner = new ApplicationUser
+            {
+                UserName = ownerEmail,
+                Email = ownerEmail,
+                EmailConfirmed = true,
+            };
+            if (owner == null)
+            {
+                await userManager.CreateAsync(newOwner, "Owner123.");
+                await userManager.AddToRoleAsync(newOwner, UserRoles.Owner);
+            }
+            else
+            {
+                if (!await userManager.IsInRoleAsync(newOwner, UserRoles.Owner))
+                {
+                    await userManager.AddToRoleAsync(newOwner, UserRoles.Owner);
                 }
             }
 
@@ -78,100 +100,129 @@ public static class SeedData
             if (context.Category.FirstOrDefault(c => c.Name == "Books") == null)
             {
                 context.Category.Add(books);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
+                ;
             }
             if (context.Category.FirstOrDefault(c => c.Name == "Games") == null)
             {
                 context.Category.Add(games);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
+                ;
             }
             if (context.Category.FirstOrDefault(c => c.Name == "Toys") == null)
             {
                 context.Category.Add(toys);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
+                ;
             }
 
-            if (!context.Item.Any())
+            if (!context.Shop.Any())
             {
+                // Seed Shops
+                var newShops = new List<Shop>
+                {
+                    new Shop
+                    {
+                        ShopName = "Online Shop",
+                        ContactNumber = "+6123456789",
+                        OwnerId = newOwner.Id,
+                        LocationType = LocationTypes.Online,
+                    },
+                    new Shop
+                    {
+                        ShopName = "Tiny Shop",
+                        ContactNumber = "+6987654321",
+                        OwnerId = newShopProprietor.Id,
+                        LocationType = LocationTypes.Physical,
+                        Address = "123 Big Street, Tiny City",
+                    },
+                };
+                context.Shop.AddRange(newShops);
+                await context.SaveChangesAsync();
+
+                // Seed Customer
+                List<Customer> customers = new List<Customer>
+                {
+                    new Customer { UserId = newCustomer.Id, IsGuest = false },
+                    new Customer { UserId = newOwner.Id, IsGuest = false },
+                    new Customer { UserId = newShopProprietor.Id, IsGuest = false },
+                    new Customer { IsGuest = true },
+                };
+                context.Customer.AddRange(customers);
+                await context.SaveChangesAsync();
+
                 // Data generated with AI
+                // Seed Items
                 var newItems = new List<Item>
                 {
                     new Item
                     {
                         Name = "The Great Gatsby",
-                        Price = 10.99m,
+                        BuyPrice = 8.99m,
                         ProductionDate = new DateTime(2021, 2, 15),
                         Description = "Classic novel by F. Scott Fitzgerald",
-                        StockAmount = 25,
                     },
                     new Item
                     {
                         Name = "Harry Potter and the Sorcerer's Stone",
-                        Price = 12.50m,
+                        BuyPrice = 10.99m,
                         ProductionDate = new DateTime(2020, 2, 10),
                         Description = "Fantasy book by J.K. Rowling",
-                        StockAmount = 40,
                     },
                     new Item
                     {
                         Name = "Atomic Habits",
-                        Price = 15.00m,
+                        BuyPrice = 13.00m,
                         ProductionDate = new DateTime(2022, 2, 05),
                         Description = "Self-improvement book by James Clear",
-                        StockAmount = 30,
                     },
                     new Item
                     {
                         Name = "The Legend of Zelda: Breath of the Wild",
-                        Price = 59.99m,
+                        BuyPrice = 50.00m,
                         ProductionDate = new DateTime(2019, 2, 20),
                         Description = "Open-world adventure game for Nintendo Switch",
-                        StockAmount = 15,
                     },
                     new Item
                     {
                         Name = "Minecraft",
-                        Price = 26.95m,
+                        BuyPrice = 23.00m,
                         ProductionDate = new DateTime(2018, 2, 14),
                         Description = "Sandbox building game for multiple platforms",
-                        StockAmount = 50,
                     },
                     new Item
                     {
                         Name = "Chess Set",
-                        Price = 20.00m,
+                        BuyPrice = 15.00m,
                         ProductionDate = new DateTime(2021, 2, 10),
                         Description = "Classic strategy board game",
-                        StockAmount = 35,
                     },
                     new Item
                     {
                         Name = "LEGO Classic Box",
-                        Price = 45.00m,
+                        BuyPrice = 41.99m,
                         ProductionDate = new DateTime(2021, 2, 01),
                         Description = "Creative building blocks for all ages",
-                        StockAmount = 60,
                     },
                     new Item
                     {
                         Name = "Barbie Doll",
-                        Price = 18.99m,
+                        BuyPrice = 14.99m,
                         ProductionDate = new DateTime(2020, 2, 12),
                         Description = "Fashion doll with accessories",
-                        StockAmount = 25,
                     },
                     new Item
                     {
                         Name = "Remote Control Car",
-                        Price = 29.99m,
+                        BuyPrice = 26.82m,
                         ProductionDate = new DateTime(2022, 2, 22),
                         Description = "High-speed RC toy car with rechargeable battery",
-                        StockAmount = 20,
                     },
                 };
                 context.Item.AddRange(newItems);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
 
+                // Seed Item Categories
                 context.ItemCategory.AddRange(
                     new ItemCategory { ItemId = newItems[0].ItemId, CategoryId = books.CategoryId },
                     new ItemCategory { ItemId = newItems[1].ItemId, CategoryId = books.CategoryId },
@@ -183,22 +234,171 @@ public static class SeedData
                     new ItemCategory { ItemId = newItems[7].ItemId, CategoryId = toys.CategoryId },
                     new ItemCategory { ItemId = newItems[8].ItemId, CategoryId = toys.CategoryId }
                 );
-                context.SaveChanges();
+                await context.SaveChangesAsync();
 
+                // Seed Reviews
                 var newReviews = new List<Review>
                 {
-                    new Review { ItemId = newItems[0].ItemId, StarRating = 5, UserId = newUser.Id, Comment = "Wow! I like this!" },
-                    new Review { ItemId = newItems[1].ItemId, StarRating = 4, UserId = newUser.Id, Comment = "Wow! I like this!" },
-                    new Review { ItemId = newItems[2].ItemId, StarRating = 5, UserId = newUser.Id},
-                    new Review { ItemId = newItems[3].ItemId, StarRating = 3, UserId = newUser.Id, Comment = "Its alright..." },
-                    new Review { ItemId = newItems[4].ItemId, StarRating = 2, UserId = newUser.Id },
-                    new Review { ItemId = newItems[5].ItemId, StarRating = 3, UserId = newUser.Id, Comment = "Its alright..." },
-                    new Review { ItemId = newItems[6].ItemId, StarRating = 1, UserId = newUser.Id, Comment = "I hate this!" },
-                    new Review { ItemId = newItems[7].ItemId, StarRating = 2, UserId = newUser.Id, Comment= "meh" },
-                    new Review { ItemId = newItems[8].ItemId, StarRating = 3, UserId = newUser.Id },
+                    new Review
+                    {
+                        ItemId = newItems[0].ItemId,
+                        StarRating = 5,
+                        UserId = newCustomer.Id,
+                        Comment = "Wow! I like this!",
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[1].ItemId,
+                        StarRating = 4,
+                        UserId = newCustomer.Id,
+                        Comment = "Wow! I like this!",
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[2].ItemId,
+                        StarRating = 5,
+                        UserId = newCustomer.Id,
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[3].ItemId,
+                        StarRating = 3,
+                        UserId = newCustomer.Id,
+                        Comment = "Its alright...",
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[4].ItemId,
+                        StarRating = 2,
+                        UserId = newCustomer.Id,
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[5].ItemId,
+                        StarRating = 3,
+                        UserId = newCustomer.Id,
+                        Comment = "Its alright...",
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[6].ItemId,
+                        StarRating = 1,
+                        UserId = newCustomer.Id,
+                        Comment = "I hate this!",
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[7].ItemId,
+                        StarRating = 2,
+                        UserId = newCustomer.Id,
+                        Comment = "meh",
+                    },
+                    new Review
+                    {
+                        ItemId = newItems[8].ItemId,
+                        StarRating = 3,
+                        UserId = newCustomer.Id,
+                    },
                 };
                 context.Review.AddRange(newReviews);
-                context.SaveChanges();
+                await context.SaveChangesAsync();
+
+                // Seed Inventory
+                Random rnd = new Random();
+                List<Inventory> onlineInventory = new List<Inventory> { };
+                List<Inventory> physicalInventory = new List<Inventory> { };
+                foreach (var item in newItems)
+                {
+                    onlineInventory.Add(
+                        new Inventory
+                        {
+                            ItemId = item.ItemId,
+                            ShopId = newShops[0].ShopId,
+                            Quantity = rnd.Next(50, 501),
+                            SellPrice = item.BuyPrice + rnd.Next(1, 10),
+                        }
+                    );
+                    physicalInventory.Add(
+                        new Inventory
+                        {
+                            ItemId = item.ItemId,
+                            ShopId = newShops[1].ShopId,
+                            Quantity = rnd.Next(50, 301),
+                            SellPrice = item.BuyPrice + rnd.Next(1, 10),
+                        }
+                    );
+                }
+                context.Inventory.AddRange(onlineInventory);
+                context.Inventory.AddRange(physicalInventory);
+                await context.SaveChangesAsync();
+
+                // Seed Order
+                List<Order> onlineOrder = new List<Order> { };
+                List<Order> physicalOrder = new List<Order> { };
+                foreach (var c in customers)
+                {
+                    onlineOrder.Add(
+                        new Order
+                        {
+                            ShopId = newShops[0].ShopId,
+                            CustomerId = c.CustomerId,
+                            Status = OrderStatus.Ordered,
+                            OrderDate = DateTime.UtcNow,
+                        }
+                    );
+                    physicalOrder.Add(
+                        new Order
+                        {
+                            ShopId = newShops[1].ShopId,
+                            CustomerId = c.CustomerId,
+                            Status = OrderStatus.Ordered,
+                            OrderDate = DateTime.UtcNow,
+                        }
+                    );
+                }
+                context.Order.AddRange(onlineOrder);
+                context.Order.AddRange(physicalOrder);
+                await context.SaveChangesAsync();
+
+                // Seed OrderItem
+                foreach (var order in onlineOrder)
+                {
+                    foreach (var inventory in onlineInventory)
+                    {
+                        context.OrderItem.Add(
+                            new OrderItem
+                            {
+                                OrderId = order.OrderId,
+                                Quantity = rnd.Next(1, 15),
+                                InventoryId = inventory.InventoryId,
+                                UnitPrice = inventory.SellPrice,
+                                UnitBuyPrice = newItems
+                                    .First(i => i.ItemId == inventory.ItemId)
+                                    .BuyPrice,
+                            }
+                        );
+                    }
+                }
+                foreach (var order in physicalOrder)
+                {
+                    foreach (var inventory in physicalInventory)
+                    {
+                        context.OrderItem.Add(
+                            new OrderItem
+                            {
+                                OrderId = order.OrderId,
+                                Quantity = rnd.Next(1, 15),
+                                InventoryId = inventory.InventoryId,
+                                UnitPrice = inventory.SellPrice,
+                                UnitBuyPrice = newItems
+                                    .First(i => i.ItemId == inventory.ItemId)
+                                    .BuyPrice,
+                            }
+                        );
+                    }
+                }
+
+                await context.SaveChangesAsync();
             }
         }
     }

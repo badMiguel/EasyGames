@@ -1,0 +1,61 @@
+@model EasyGames.Models.UserSalesViewModel
+
+@{
+    ViewData["Title"] = "User Sales";
+}
+
+<h2>User Sales</h2>
+
+<div class="mb-3">
+    <p class="mb-1 fw-bold">Total Revenue: @Model.TotalRevenue.ToString("C")</p>
+    <p class="mb-0 fw-bold">Total Profit: @Model.TotalProfit.ToString("C")</p>
+</div>
+
+<div class="list-group">
+    @foreach (var transaction in Model.Transactions)
+    {
+        var order = transaction.Order;
+        var customer = order?.Customer;
+        var user = customer?.User;
+        var orderItems = transaction.OrderItems;
+
+        var collapseId = $"transaction{transaction.OrderId}";
+
+        <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="fw-semibold">
+                        @(customer?.IsGuest == true ? "Guest" : user?.UserName)
+                    </span>
+                    <br />
+                    <small class="text-muted">@order?.OrderDate?.ToString("d MMM yyyy hh:mm tt")</small>
+                </div>
+                <button class="btn btn-sm btn-outline-primary"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#@collapseId"
+                        aria-expanded="false"
+                        aria-controls="@collapseId">
+                    View Items
+                </button>
+            </div>
+
+            <div class="collapse mt-2" id="@collapseId">
+                <div class="card card-body">
+                    @foreach (var item in orderItems)
+                    {
+                        <div class="d-flex justify-content-between">
+                            <div>@item.Inventory?.Item?.Name</div>
+                            <div>@((item.UnitPrice * item.Quantity).ToString("C"))</div>
+                        </div>
+                    }
+                    <hr />
+                    <div class="d-flex justify-content-end fw-bold">
+                        Total: @(transaction.TotalCost.ToString("C"))
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+

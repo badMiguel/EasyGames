@@ -1,0 +1,12 @@
+@model EasyGames.Models.PageDetails
+
+<ul class="pagination d-flex justify-content-end">
+    <li class="page-item @(Model.HasPreviousPage ? "" : " disabled") me-3">
+        <a class="page-link" asp-route-pageSize="@(Model.PageSize)"
+            asp-route-pageNumber="@(Model.PageIndex - 1)">Previous</a>
+    </li>
+    <li class="page-item @(Model.HasNextPage ? "" : " disabled")">
+        <a class="page-link" asp-route-pageSize="@(Model.PageSize)"
+            asp-route-pageNumber="@(Model.PageIndex + 1)">Next</a>
+    </li>
+</ul>

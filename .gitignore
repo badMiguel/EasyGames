@@ -56,3 +56,4 @@ nunit-*.xml
 .config
 *.db*
 EasyGames/Migrations
+.vs

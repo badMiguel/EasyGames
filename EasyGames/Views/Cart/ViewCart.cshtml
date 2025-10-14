@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Cart";
-    var totalPrice = 0m;
+    decimal totalPrice = 0m;
 }
 
 <h1 class="text-center mb-5">My Cart</h1>
@@ -21,37 +21,38 @@
     <p class="col-2 mb-0 text-end">Subtotal</p>
 </div>
 <hr class="mb-5">
-@foreach (var item in Model) {
+@foreach (var orderItem in Model) {
     <div class="row align-items-center">
         <div class="col-2">
             <img src="~/images/image.jpg" class="img-fluid rounded" alt="" />
         </div>
         <div class="col-5">
-            <a class="text-decoration-none text-dark" asp-controller="Home" asp-action="ItemDetails"  asp-route-id="@item.ItemId">
+            <a class="text-decoration-none text-dark" asp-controller="Home" asp-action="ItemDetails"  asp-route-id="@orderItem.InventoryId">
             <p>
-                @(item.Item.ItemCategorys?.Any() == true
-                ? string.Join(", ", item.Item.ItemCategorys
+                @(orderItem.Inventory.Item.ItemCategorys?.Any() == true
+                ? string.Join(", ", orderItem.Inventory.Item.ItemCategorys
                     .Select(ic => ic.Category?.Name ?? ""))
                 : "")
             </p>
-            <h3>@item.Item.Name</h3>
-            <p>AU$@item.UnitPrice</p>
+            <h3>@orderItem.Inventory.Item.Name</h3>
+            <p>AU$@orderItem.UnitPrice</p>
             </a>
         </div>
         <div class="col-2">
             <form asp-controller="" method="POST" class="">
-                <input type="hidden" name="OrderItemId" value="@item.OrderItemId" />
+                <input type="hidden" name="OrderItemId" value="@orderItem.OrderItemId" />
                 <div class="flex-grow-1 mb-2">
-                    <input type="number" class="form-control" name="quantity" value="@item.Quantity" min="1" max="@item.Item.StockAmount">
+                    <input type="number" class="form-control" name="quantity" value="@orderItem.Quantity" min="1" max="@orderItem.Inventory.Quantity">
                 </div>
                 <input type="submit" value="Change" formaction="/Cart/ChangeQuantity" class="btn btn-primary btn-sm" />
             </form>
         </div>
-        @{totalPrice += item.UnitPrice * item.Quantity;}
-        <p class="col-2 text-end">AU$@( item.UnitPrice * item.Quantity)</p>
+        @{decimal orderPrice = orderItem.UnitPrice * orderItem.Quantity;}
+        @{totalPrice += orderPrice;}
+        <p class="col-2 text-end">AU @orderPrice.ToString("C")</p>
         <div class="col-1">
             <form asp-controller="Cart" asp-action="RemoveItem" method="post" class="text-center">
-                <input type="hidden" name="orderItemId" value="@item.OrderItemId" />
+                <input type="hidden" name="orderItemId" value="@orderItem.OrderItemId" />
                 <button type="submit" class="btn btn-link p-0 text-danger border-0 shadow-none">
                     <i class="fa-solid fa-xmark pb-3"></i>
                 </button>
@@ -65,7 +66,7 @@
 <div class="row">
     <div class="col-2"></div>
     <p class="fw-bold fs-5 col-7">Total</p>
-    <p class="col-2 text-end fw-bold fs-5">AU$@totalPrice</p>
+    <p class="col-2 text-end fw-bold fs-5">AU @totalPrice.ToString("C")</p>
 </div>
 
 <div class="row">

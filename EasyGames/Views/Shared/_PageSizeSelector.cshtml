@@ -1,0 +1,33 @@
+@model EasyGames.Models.PageDetails
+
+<div class="mb-3 d-flex align-items-center justify-content-end">
+    <span class="me-2 fw-bold">View by:</span>
+    <div class="btn-group" role="group" aria-label="Page size selector">
+        <a class="btn btn-outline-primary @(Model.PageSize == 5 ? "active" : "")"
+            asp-route-pageSize="5"
+            asp-route-pageNumber="@(Model.PageIndex)">
+            5
+        </a>
+        <a class="btn btn-outline-primary @(Model.PageSize == 10 ? "active" : "")"
+            asp-route-pageSize="10"
+            asp-route-pageNumber="@(Model.PageIndex)">
+            10
+        </a>
+        <a class="btn btn-outline-primary @(Model.PageSize == 15 ? "active" : "")"
+            asp-route-pageSize="15"
+            asp-route-pageNumber="@(Model.PageIndex)">
+            15
+        </a>
+        <a class="btn btn-outline-primary @(Model.PageSize == 20 ? "active" : "")"
+            asp-route-pageSize="20"
+            asp-route-pageNumber="@(Model.PageIndex)">
+            20
+        </a>
+        <a class="btn btn-outline-primary @(Model.PageSize == 25 ? "active" : "")"
+            asp-route-pageSize="25"
+            asp-route-pageNumber="@(Model.PageIndex)">
+            25
+        </a>
+    </div>
+</div>
+

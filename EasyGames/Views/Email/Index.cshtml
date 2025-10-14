@@ -1,0 +1,44 @@
+@model EasyGames.Models.EmailGroupRequest
+
+@{
+    ViewData["Title"] = "Send Email to Users";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["Success"] != null && (bool)TempData["Success"])
+{
+    <div class="alert alert-success">
+        Emails have been sent successfully!
+    </div>
+}
+
+<form asp-action="Index" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group mb-3">
+        <label asp-for="SelectedStatus" class="form-label"></label>
+        <select asp-for="SelectedStatus" asp-items="Model.StatusOptions" class="form-select">
+            <option value="">Send To All</option>
+        </select>
+        <span asp-validation-for="SelectedStatus" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Subject" class="form-label"></label>
+        <input asp-for="Subject" class="form-control" />
+        <span asp-validation-for="Subject" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Body" class="form-label"></label>
+        <textarea asp-for="Body" class="form-control" rows="6"></textarea>
+        <span asp-validation-for="Body" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Send Email</button>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

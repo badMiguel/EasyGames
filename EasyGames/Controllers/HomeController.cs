@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using EasyGames.Data;
 using EasyGames.Models;
+using EasyGames.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -43,7 +44,10 @@ public class HomeController : Controller
 
     // Helper method to get top 3 items from each categories to display on the
     // home page.
-    private void GetTopItems(Dictionary<string, List<HomeItemCards>> itemCards, string category)
+    private async Task GetTopItems(
+        Dictionary<string, List<HomeItemCards>> itemCards,
+        string category
+    )
     {
         var getItems = _context
             .Category.Include(c => c.ItemCategories)
@@ -64,6 +68,9 @@ public class HomeController : Controller
                 continue;
 
             var rating = GetRating(item.ItemId);
+            var inventory = await _context.Inventory.FirstOrDefaultAsync(i =>
+                i.ItemId == item.ItemId
+            );
 
             itemList.Add(
                 new HomeItemCards
@@ -71,7 +78,7 @@ public class HomeController : Controller
                     ItemId = item.ItemId,
                     Name = item.Name,
                     Category = category,
-                    Price = item.Price,
+                    Price = inventory.SellPrice,
                     Rating = rating.AverageRating,
                     RatingCount = rating.RatingCount,
                 }
@@ -99,34 +106,46 @@ public class HomeController : Controller
         return ((double)sumRating / reviews.Count, rateCounter);
     }
 
-    public IActionResult Category(string name)
+    [Route("Home/Category/{name}")]
+    public async Task<IActionResult> Category(string name, int? pageNumber, int? pageSize)
     {
         if (string.IsNullOrEmpty(name))
         {
             return RedirectToAction("Index");
         }
 
-        var getItems = _context
-            .Category.Include(c => c.ItemCategories)
-            .ThenInclude(ic => ic.Item)
-            .FirstOrDefault(c => c.Name == name);
+        var isValidCategory = await _context.Category.FirstOrDefaultAsync(c => c.Name == name);
 
-        if (getItems == null)
+        if (isValidCategory == null)
         {
             return RedirectToAction("CategoryNotFound");
         }
 
+        var items = _context
+            .Item.Include(i => i.ItemCategorys)
+            .ThenInclude(ic => ic.Category)
+            .AsNoTracking()
+            .Where(i => i.ItemCategorys.Any(ic => ic.Category.Name == name));
+
         ViewData["Category"] = name;
-        var items = getItems.ItemCategories.Select(ic => ic.Item).ToList();
+
+        var paginatedItem = await Pagination<Item>.CreateAsync(items, pageNumber, pageSize);
+        ViewData["PageDetails"] = new PageDetails
+        {
+            PageSize = paginatedItem.PageSize,
+            PageIndex = paginatedItem.PageIndex,
+            HasNextPage = paginatedItem.HasNextPage,
+            HasPreviousPage = paginatedItem.HasPreviousPage,
+        };
 
         var itemList = new List<HomeItemCards>();
-
-        foreach (var item in items)
+        foreach (var item in paginatedItem)
         {
             if (item == null)
                 continue;
 
             var rating = GetRating(item.ItemId);
+            var inventory = await _context.Inventory.FindAsync(item.ItemId);
 
             itemList.Add(
                 new HomeItemCards
@@ -134,7 +153,7 @@ public class HomeController : Controller
                     ItemId = item.ItemId,
                     Name = item.Name,
                     Category = name,
-                    Price = item.Price,
+                    Price = inventory.SellPrice,
                     Rating = rating.AverageRating,
                     RatingCount = rating.RatingCount,
                 }
@@ -174,10 +193,22 @@ public class HomeController : Controller
             }
         }
 
-        var details = new ItemDetails
+        var inventory = await _context
+            .Inventory.Include(i => i.Shop)
+            .Include(i => i.Item)
+            .FirstOrDefaultAsync(i =>
+                i.Shop!.LocationType == LocationTypes.Online && i.ItemId == item.ItemId
+            );
+        if (inventory == null)
+        {
+            return NotFound();
+        }
+
+        var details = new ItemDetailsUserViewModel
         {
             ItemId = item.ItemId,
             Item = item,
+            Inventory = inventory,
             Rating = rating.AverageRating,
             RatingCount = rating.RatingCount,
             Reviews = reviews.Reviews,

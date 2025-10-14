@@ -1,0 +1,95 @@
+@model EasyGames.Models.InventoryIndexViewModel
+
+@{
+    ViewData["Title"] = "Inventory List";
+}
+
+<div class="mb-4 row justify-content-between">
+    <div class="d-flex flex-column justify-content-between col-lg-8">
+        <div>
+            <h1 class="mb-0">@Model.ShopName Inventory</h1>
+            <small class="text-muted">Items available in this shop</small>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" asp-route-shopId="@Model.ShopId" class="btn btn-primary">Create New</a>
+            <a asp-controller="Shop" asp-action="Index" class="btn btn-outline-secondary">Back to Shop List</a>
+        </div>
+    </div>
+
+    <div class="card px-3 py-2 gap-2 col d-flex flex-column justify-content-between">
+        <h3 class="card-title">Summary</h3>
+        <dl class="row mb-0">
+            <dt class="col-5">Total Revenue:</dt>
+            <dd class="col-7 text-end">@Model.TotalRevenue.ToString("C")</dd>
+
+            <dt class="col-5">Total Profit:</dt>
+            <dd class="col-7 text-end">@Model.TotalProfit.ToString("C")</dd>
+        </dl>
+    </div>
+</div>
+
+@await Html.PartialAsync("_PageSizeSelector", Model.PageDetails)
+
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.InventoryItems.First().Item)
+            </th>
+            <th class="text-end">
+                @Html.DisplayNameFor(model => model.InventoryItems.First().Revenue)
+            </th>
+            <th class="text-end">
+                @Html.DisplayNameFor(model => model.InventoryItems.First().ProfitGenerated)
+            </th>
+            <th class="text-center">
+                @Html.DisplayNameFor(model => model.InventoryItems.First().Quantity)
+            </th>
+            <th scope="col" class="text-end">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @if (!Model.InventoryItems?.Any() ?? true)
+    {
+        <tr>
+            <td colspan="5">
+                <div class="card border-0 bg-light p-3 mb-0">
+                    <div class="card-body text-center">
+                        <div class="h5 mb-1">No inventory items</div>
+                        <p class="mb-0 text-muted">Use <strong>Create New</strong> to add the first item.</p>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    }
+    else
+    {
+    foreach (var item in Model.InventoryItems) 
+    {
+        <tr>
+            <td>
+                <div class="d-flex flex-column">
+                    <div class="fw-semibold">@item.Item?.Name</div>
+                    <small class="text-muted">@item.Item?.Description</small>
+                </div>
+            </td>
+            <td class="text-end">
+                @Html.DisplayFor(modelItem => item.Revenue)
+            </td>
+            <td class="text-end">
+                @Html.DisplayFor(modelItem => item.ProfitGenerated)
+            </td>
+            <td class="text-center">
+                @Html.DisplayFor(modelItem => item.Quantity)
+            </td>
+            <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary" asp-route-shopId="@Model.ShopId" asp-action="Edit" asp-route-id="@item.InventoryId">Edit</a>
+                <a class="btn btn-sm btn-outline-info" asp-route-shopId="@Model.ShopId" asp-action="Details" asp-route-id="@item.InventoryId">Details</a>
+                <a class="btn btn-sm btn-outline-danger" asp-route-shopId="@Model.ShopId" asp-action="Delete" asp-route-id="@item.InventoryId">Delete</a>
+            </td>
+        </tr>
+    }}
+    </tbody>
+</table>
+
+@await Html.PartialAsync("_MovePagePartial", Model.PageDetails)

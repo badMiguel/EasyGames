@@ -6,6 +6,8 @@
 
 <h2>@ViewData["Category"]</h2>
 
+@await Html.PartialAsync("_PageSizeSelector", ViewData["PageDetails"])
+
 <div class="row">
     @foreach (var item in Model) 
     {
@@ -26,3 +28,5 @@
         </div>
     }
 </div>
+
+@await Html.PartialAsync("_MovePagePartial", ViewData["PageDetails"])

@@ -4,14 +4,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using EasyGames.Data;
 using EasyGames.Models;
+using EasyGames.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 
 namespace EasyGames.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Owner)]
     public class ItemController : Controller
     {
         private readonly EasyGamesContext _context;
@@ -22,9 +23,22 @@ namespace EasyGames.Controllers
         }
 
         // GET: Item
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? pageNumber, int? pageSize)
         {
-            return View(await _context.Item.ToListAsync());
+            var paginatedItems = await Pagination<Item>.CreateAsync(
+                _context.Item.AsNoTracking(),
+                pageNumber,
+                pageSize
+            );
+            ViewData["PageDetails"] = new PageDetails
+            {
+                PageSize = paginatedItems.PageSize,
+                PageIndex = paginatedItems.PageIndex,
+                HasNextPage = paginatedItems.HasNextPage,
+                HasPreviousPage = paginatedItems.HasPreviousPage,
+            };
+
+            return View(paginatedItems);
         }
 
         // GET: Item/Details/5
@@ -41,7 +55,34 @@ namespace EasyGames.Controllers
                 return NotFound();
             }
 
-            return View(item);
+            var unitsSold = await _context
+                .OrderItem.Include(oi => oi.Inventory)
+                .ThenInclude(i => i.Item)
+                .Where(oi => oi.Inventory.ItemId == item.ItemId)
+                .SumAsync(oi => oi.Quantity);
+
+            var revenue = await _context
+                .OrderItem.Include(oi => oi.Inventory)
+                .ThenInclude(i => i.Item)
+                .Where(oi => oi.Inventory.ItemId == item.ItemId)
+                .SumAsync(oi => oi.Quantity * oi.UnitPrice);
+
+            var profit = await _context
+                .OrderItem.Include(oi => oi.Inventory)
+                .ThenInclude(i => i.Item)
+                .Where(oi => oi.Inventory.ItemId == item.ItemId)
+                .SumAsync(oi => oi.Quantity * (oi.UnitPrice - oi.UnitBuyPrice));
+
+            var itemDetailsOwner = new ItemDetailsOwnerViewModel
+            {
+                Item = item,
+                ItemId = item.ItemId,
+                Revenue = revenue,
+                TotalUnitsSold = unitsSold,
+                ProfitGenerated = profit,
+            };
+
+            return View(itemDetailsOwner);
         }
 
         // GET: Item/Create
@@ -56,7 +97,7 @@ namespace EasyGames.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("ItemId,Name,Price,ProductionDate,Description,StockAmount")] Item item
+            [Bind("ItemId,Name,BuyPrice,ProductionDate,Description")] Item item
         )
         {
             if (ModelState.IsValid)
@@ -91,7 +132,7 @@ namespace EasyGames.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             int id,
-            [Bind("ItemId,Name,Price,ProductionDate,Description,StockAmount")] Item item
+            [Bind("ItemId,Name,BuyPrice,ProductionDate,Description")] Item item
         )
         {
             if (id != item.ItemId)
