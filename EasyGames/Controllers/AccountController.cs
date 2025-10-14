@@ -1,6 +1,8 @@
+using System.Runtime.InteropServices.Marshalling;
 using System.Text.Encodings.Web;
 using EasyGames.Data;
 using EasyGames.Models;
+using EasyGames.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,20 +22,29 @@ public class AccountController : Controller
         _userManager = userManager;
     }
 
-    public async Task<IActionResult> Transactions()
+    public async Task<IActionResult> Transactions(int? pageNumber, int? pageSize)
     {
         var loggedInUserId = _userManager.GetUserId(User);
 
-        var orders = await _context
+        var orders = _context
             .Order.Include(o => o.Customer)
             .Include(o => o.OrderItems)
             .ThenInclude(oi => oi.Inventory)
             .ThenInclude(i => i.Item)
             .Where(o => o.Customer.UserId == loggedInUserId && o.Status == OrderStatus.Ordered)
             .OrderByDescending(o => o.OrderDate)
-            .ToListAsync();
+            .AsNoTracking();
 
-        var transactions = orders
+        var paginatedOrders = await Pagination<Order>.CreateAsync(orders, pageNumber, pageSize);
+        ViewData["PageDetails"] = new PageDetails
+        {
+            PageSize = paginatedOrders.PageSize,
+            PageIndex = paginatedOrders.PageIndex,
+            HasNextPage = paginatedOrders.HasNextPage,
+            HasPreviousPage = paginatedOrders.HasPreviousPage,
+        };
+
+        var transactions = paginatedOrders
             .Select(o => new UserTransactionViewModel
             {
                 Order = o,
