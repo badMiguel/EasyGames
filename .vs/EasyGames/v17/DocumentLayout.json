@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\gusma\\source\\repos\\EasyGames\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{C8513928-B4FB-476D-B0D8-C82EED513C49}|EasyGames\\EasyGames.csproj|c:\\users\\gusma\\source\\repos\\easygames\\easygames\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C8513928-B4FB-476D-B0D8-C82EED513C49}|EasyGames\\EasyGames.csproj|solutionrelative:easygames\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AdminController.cs",
+              "DocumentMoniker": "C:\\Users\\gusma\\source\\repos\\EasyGames\\EasyGames\\Controllers\\AdminController.cs",
+              "RelativeDocumentMoniker": "EasyGames\\Controllers\\AdminController.cs",
+              "ToolTip": "C:\\Users\\gusma\\source\\repos\\EasyGames\\EasyGames\\Controllers\\AdminController.cs",
+              "RelativeToolTip": "EasyGames\\Controllers\\AdminController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-30T09:01:32.685Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
