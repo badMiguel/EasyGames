@@ -1,6 +1,7 @@
 using System.Text.Encodings.Web;
 using EasyGames.Data;
 using EasyGames.Models;
+using EasyGames.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -25,10 +26,22 @@ public class AdminController : Controller
         _roleManager = roleManager;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index(int? pageNumber, int? pageSize)
     {
-        var users = _userManager.Users.ToList();
-        return View(users);
+        var users = _userManager.Users;
+        var paginatedUsers = await Pagination<ApplicationUser>.CreateAsync(
+            users,
+            pageNumber,
+            pageSize
+        );
+        ViewData["PageDetails"] = new PageDetails
+        {
+            PageSize = paginatedUsers.PageSize,
+            PageIndex = paginatedUsers.PageIndex,
+            HasNextPage = paginatedUsers.HasNextPage,
+            HasPreviousPage = paginatedUsers.HasPreviousPage,
+        };
+        return View(paginatedUsers);
     }
 
     // GET: Admin/Details/<user_id>
