@@ -25,7 +25,7 @@ public class HomeController : Controller
         _userManager = userManager;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         var itemCards = new Dictionary<string, List<HomeItemCards>>();
         var categories = _context.Category.ToList();
@@ -36,7 +36,7 @@ public class HomeController : Controller
                 if (category.Name == null)
                     continue;
 
-                GetTopItems(itemCards, category.Name);
+                await GetTopItems(itemCards, category.Name);
             }
         }
         return View(itemCards);

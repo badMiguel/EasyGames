@@ -42,7 +42,7 @@ public class CartSummaryViewComponent : ViewComponent
             return -1;
         }
 
-        var order = _context.Order.FirstOrDefault(o =>
+        var order = await _context.Order.FirstOrDefaultAsync(o =>
             o.Status == OrderStatus.InCart && o.CustomerId == customer.CustomerId
         );
 
@@ -61,7 +61,7 @@ public class CartSummaryViewComponent : ViewComponent
             return View(0);
         }
 
-        var cartCount = _context.OrderItem.Count(oi => oi.OrderId == orderId);
+        var cartCount = await _context.OrderItem.CountAsync(oi => oi.OrderId == orderId);
         return View(cartCount);
     }
 }
