@@ -85,7 +85,7 @@ public class EmailController : Controller
 
         try
         {
-            await _emailService.SendEmailAsync(recipients, req.Subject, req.Body);
+            await _emailService.SendGroupEmailAsync(recipients, req.Subject, req.Body);
             TempData["Success"] = true;
             return View(
                 new EmailGroupRequest { StatusOptions = new SelectList(UserStatus.AllStatus) }

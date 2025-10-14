@@ -13,7 +13,8 @@ public class SmtpSettings
 
 public interface IEmailService
 {
-    Task SendEmailAsync(IEnumerable<string?> toList, string subject, string body);
+    Task SendEmailAsync(string? to, string subject, string body);
+    Task SendGroupEmailAsync(IEnumerable<string?> toList, string subject, string body);
 }
 
 public class SmtpEmailService : IEmailService
@@ -25,7 +26,31 @@ public class SmtpEmailService : IEmailService
         _settings = settings.Value;
     }
 
-    public async Task SendEmailAsync(IEnumerable<string?> toList, string subject, string body)
+    public async Task SendEmailAsync(string? to, string subject, string body)
+    {
+        if (to == null)
+        {
+            throw new ArgumentException("Recipient list is empty", nameof(to));
+        }
+
+        using var message = new MailMessage();
+        message.From = new MailAddress(_settings.From);
+        message.To.Add(to);
+        message.Subject = subject;
+        message.IsBodyHtml = true;
+        message.Body = body;
+
+        using var client = new SmtpClient(_settings.Host, _settings.Port)
+        {
+            EnableSsl = true,
+            UseDefaultCredentials = false,
+            Credentials = new NetworkCredential(_settings.Username, _settings.Password),
+        };
+
+        await client.SendMailAsync(message, default).ConfigureAwait(false);
+    }
+
+    public async Task SendGroupEmailAsync(IEnumerable<string?> toList, string subject, string body)
     {
         if (!toList.Any())
         {
