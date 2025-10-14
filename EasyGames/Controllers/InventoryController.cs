@@ -1,15 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using EasyGames.Data;
 using EasyGames.Models;
 using EasyGames.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Build.Framework;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace EasyGames.Controllers
 {
@@ -92,19 +93,24 @@ namespace EasyGames.Controllers
 
             var paginatedInventory = await Pagination<Inventory>.CreateAsync(inventories, pageNumber, pageSize);
 
-            var tasks = paginatedInventory.Select(async i => new InventoryDetailViewModel
+            var inventoryDetails = new List<InventoryDetailViewModel>();
+            foreach (var i in paginatedInventory)
             {
-                InventoryId = i.InventoryId,
-                ItemId = i.ItemId,
-                Item = i.Item,
-                SellPrice = i.SellPrice,
-                Quantity = i.Quantity,
-                Revenue = await GetItemRevenue(i.InventoryId),
-                TotalUnitsSold = await GetUnitsSoldByShop(i.InventoryId),
-                ProfitGenerated = await GetItemProfit(i.InventoryId),
-            });
-
-            var inventoryItems = await Task.WhenAll(tasks);
+                var totalUnitsSold = await GetUnitsSoldByShop(i.InventoryId);
+                var revenue = await GetItemRevenue(i.InventoryId);
+                var profitGenerated = await GetItemProfit(i.InventoryId);
+                inventoryDetails.Add(new InventoryDetailViewModel
+                {
+                    InventoryId = i.InventoryId,
+                    ItemId = i.ItemId,
+                    Item = i.Item,
+                    SellPrice = i.SellPrice,
+                    Quantity = i.Quantity,
+                    Revenue = await GetItemRevenue(i.InventoryId),
+                    TotalUnitsSold = await GetUnitsSoldByShop(i.InventoryId),
+                    ProfitGenerated = await GetItemProfit(i.InventoryId),
+                });
+            }
 
             var inventoryIndex = new InventoryIndexViewModel
             {
@@ -112,7 +118,7 @@ namespace EasyGames.Controllers
                 ShopName = shop!.ShopName,
                 TotalProfit = await GetShopProfit(shopId),
                 TotalRevenue = await GetShopRevenue(shopId),
-                InventoryItems = inventoryItems,
+                InventoryItems = inventoryDetails,
                 PageDetails = new PageDetails
                 {
                     HasPreviousPage = paginatedInventory.HasPreviousPage,
