@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using EasyGames.Data;
 using EasyGames.Models;
+using EasyGames.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -105,29 +106,40 @@ public class HomeController : Controller
         return ((double)sumRating / reviews.Count, rateCounter);
     }
 
-    public async Task<IActionResult> Category(string name)
+    [Route("Home/Category/{name}")]
+    public async Task<IActionResult> Category(string name, int? pageNumber, int? pageSize)
     {
         if (string.IsNullOrEmpty(name))
         {
             return RedirectToAction("Index");
         }
 
-        var getItems = _context
-            .Category.Include(c => c.ItemCategories)
-            .ThenInclude(ic => ic.Item)
-            .FirstOrDefault(c => c.Name == name);
+        var isValidCategory = await _context.Category.FirstOrDefaultAsync(c => c.Name == name);
 
-        if (getItems == null)
+        if (isValidCategory == null)
         {
             return RedirectToAction("CategoryNotFound");
         }
 
+        var items = _context
+            .Item.Include(i => i.ItemCategorys)
+            .ThenInclude(ic => ic.Category)
+            .AsNoTracking()
+            .Where(i => i.ItemCategorys.Any(ic => ic.Category.Name == name));
+
         ViewData["Category"] = name;
-        var items = getItems.ItemCategories.Select(ic => ic.Item).ToList();
+
+        var paginatedItem = await Pagination<Item>.CreateAsync(items, pageNumber, pageSize);
+        ViewData["PageDetails"] = new PageDetails
+        {
+            PageSize = paginatedItem.PageSize,
+            PageIndex = paginatedItem.PageIndex,
+            HasNextPage = paginatedItem.HasNextPage,
+            HasPreviousPage = paginatedItem.HasPreviousPage,
+        };
 
         var itemList = new List<HomeItemCards>();
-
-        foreach (var item in items)
+        foreach (var item in paginatedItem)
         {
             if (item == null)
                 continue;
