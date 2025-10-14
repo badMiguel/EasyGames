@@ -1,6 +1,7 @@
 using System.Text.Encodings.Web;
 using EasyGames.Data;
 using EasyGames.Models;
+using EasyGames.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +37,7 @@ public class UserSales : Controller
         return totalProfit;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index(int? pageNumber, int? pageSize)
     {
         var transactions = _context
             .Order.Include(o => o.Customer)
@@ -52,13 +53,22 @@ public class UserSales : Controller
                 OrderItems = o.OrderItems,
                 TotalCost = o.OrderItems.Sum(oi => oi.UnitPrice * oi.Quantity),
             })
-            .ToList();
+            .AsNoTracking();
+
+        var paginatedTransactions = await Pagination<UserTransactionViewModel>.CreateAsync(transactions, pageNumber, pageSize);
 
         var userSales = new UserSalesViewModel
         {
             TotalRevenue = GetTotalRevenue(transactions),
             TotalProfit = GetTotalProfit(transactions),
-            Transactions = transactions,
+            Transactions = paginatedTransactions,
+            PageDetails = new PageDetails
+            {
+                PageSize = paginatedTransactions.PageSize,
+                PageIndex = paginatedTransactions.PageIndex,
+                HasNextPage = paginatedTransactions.HasNextPage,
+                HasPreviousPage = paginatedTransactions.HasPreviousPage,
+            }
         };
 
         return View(userSales);

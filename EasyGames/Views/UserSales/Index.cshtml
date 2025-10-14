@@ -11,6 +11,8 @@
     <p class="mb-0 fw-bold">Total Profit: @Model.TotalProfit.ToString("C")</p>
 </div>
 
+@await Html.PartialAsync("_PageSizeSelector", Model.PageDetails)
+
 <div class="list-group">
     @foreach (var transaction in Model.Transactions)
     {
@@ -59,3 +61,4 @@
     }
 </div>
 
+@await Html.PartialAsync("_MovePagePartial", Model.PageDetails)

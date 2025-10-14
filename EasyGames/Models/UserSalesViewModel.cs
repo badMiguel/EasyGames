@@ -17,4 +17,6 @@ public class UserSalesViewModel
 
     public IEnumerable<UserTransactionViewModel> Transactions { get; set; } =
         Enumerable.Empty<UserTransactionViewModel>();
+
+    public PageDetails? PageDetails { get; set; }
 }
