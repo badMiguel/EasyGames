@@ -21,7 +21,7 @@ public class CartController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddToCart(ItemDetails itemDetails, int quantity)
+    public async Task<IActionResult> AddToCart(ItemDetailsUserViewModel itemDetails, int quantity)
     {
         var orderItemExists = await OrderItemExists(itemDetails, quantity);
         if (orderItemExists)
@@ -66,7 +66,7 @@ public class CartController : Controller
         return null;
     }
 
-    private async Task<bool> OrderItemExists(ItemDetails itemDetails, int quantity)
+    private async Task<bool> OrderItemExists(ItemDetailsUserViewModel itemDetails, int quantity)
     {
         var customer = await GetCustomer();
         if (customer == null)
@@ -108,7 +108,7 @@ public class CartController : Controller
     }
 
     private async Task CreateOrderItem(
-        ItemDetails itemDetails,
+        ItemDetailsUserViewModel itemDetails,
         int quantity,
         int orderId,
         decimal unitPrice,
@@ -176,7 +176,7 @@ public class CartController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> BuyNow(ItemDetails itemDetails, int quantity)
+    public async Task<IActionResult> BuyNow(ItemDetailsUserViewModel itemDetails, int quantity)
     {
         var orderItemExists = await OrderItemExists(itemDetails, quantity);
         if (orderItemExists)

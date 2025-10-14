@@ -192,7 +192,7 @@ public class HomeController : Controller
             return NotFound();
         }
 
-        var details = new ItemDetails
+        var details = new ItemDetailsUserViewModel
         {
             ItemId = item.ItemId,
             Item = item,

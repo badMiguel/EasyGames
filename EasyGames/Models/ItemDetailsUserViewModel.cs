@@ -1,6 +1,6 @@
 namespace EasyGames.Models;
 
-public class ItemDetails
+public class ItemDetailsUserViewModel
 {
     public int ItemId { get; set; }
     public Item? Item { get; set; }
