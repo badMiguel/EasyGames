@@ -24,8 +24,10 @@ else
 
 builder
     .Services.AddDefaultIdentity<ApplicationUser>(options =>
-        options.SignIn.RequireConfirmedAccount = true
-    )
+    {
+        options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedEmail = true;
+    })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<EasyGamesContext>();
 
