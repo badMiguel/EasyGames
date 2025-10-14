@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using EasyGames.Data;
 using EasyGames.Models;
+using EasyGames.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -22,9 +23,22 @@ namespace EasyGames.Controllers
         }
 
         // GET: Item
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? pageNumber, int? pageSize)
         {
-            return View(await _context.Item.ToListAsync());
+            var paginatedItems = await Pagination<Item>.CreateAsync(
+                _context.Item.AsNoTracking(),
+                pageNumber,
+                pageSize
+            );
+            ViewData["PageDetails"] = new PageDetails
+            {
+                PageSize = paginatedItems.PageSize,
+                PageIndex = paginatedItems.PageIndex,
+                HasNextPage = paginatedItems.HasNextPage,
+                HasPreviousPage = paginatedItems.HasPreviousPage,
+            };
+
+            return View(paginatedItems);
         }
 
         // GET: Item/Details/5
