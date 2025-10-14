@@ -28,6 +28,8 @@
     </div>
 </div>
 
+@await Html.PartialAsync("_PageSizeSelector", Model.PageDetails)
+
 <table class="table table-hover align-middle">
     <thead class="table-light">
         <tr>
@@ -89,3 +91,5 @@
     }}
     </tbody>
 </table>
+
+@await Html.PartialAsync("_MovePagePartial", Model.PageDetails)

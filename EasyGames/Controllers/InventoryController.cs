@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using EasyGames.Data;
 using EasyGames.Models;
+using EasyGames.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -76,20 +77,22 @@ namespace EasyGames.Controllers
 
         // GET: Inventory
         [HttpGet("")]
-        public async Task<IActionResult> Index([FromRoute] int shopId)
+        public async Task<IActionResult> Index(int shopId, int? pageNumber, int? pageSize)
         {
             var shop = await _context.Shop.FindAsync(shopId);
-
-            var inventories = await _context
-                .Inventory.Include(i => i.Item)
-                .Include(i => i.Shop)
-                .Where(i => i.ShopId == shopId)
-                .ToListAsync();
-
-            if (!IsOwnerOfShop(inventories.Select(i => i.ShopId).FirstOrDefault()))
+            if (!IsOwnerOfShop(shop?.ShopId))
                 return Forbid();
 
-            var tasks = inventories.Select(async i => new InventoryDetailViewModel
+            var inventories = _context
+                .Inventory.Include(i => i.Item)
+                .Include(i => i.Shop)
+                .OrderBy(i => i.Item.Name)
+                .Where(i => i.ShopId == shopId)
+                .AsNoTracking();
+
+            var paginatedInventory = await Pagination<Inventory>.CreateAsync(inventories, pageNumber, pageSize);
+
+            var tasks = paginatedInventory.Select(async i => new InventoryDetailViewModel
             {
                 InventoryId = i.InventoryId,
                 ItemId = i.ItemId,
@@ -110,6 +113,13 @@ namespace EasyGames.Controllers
                 TotalProfit = await GetShopProfit(shopId),
                 TotalRevenue = await GetShopRevenue(shopId),
                 InventoryItems = inventoryItems,
+                PageDetails = new PageDetails
+                {
+                    HasPreviousPage = paginatedInventory.HasPreviousPage,
+                    HasNextPage = paginatedInventory.HasNextPage,
+                    PageIndex = paginatedInventory.PageIndex,
+                    PageSize = paginatedInventory.PageSize,
+                }
             };
 
             return View(inventoryIndex);

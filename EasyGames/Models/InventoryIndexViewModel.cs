@@ -17,6 +17,8 @@ public class InventoryIndexViewModel
     public int ShopId { get; set; }
     public string? ShopName { get; set; }
 
+    public PageDetails? PageDetails {get;set;} 
+
     public IEnumerable<InventoryDetailViewModel> InventoryItems { get; set; } =
         Enumerable.Empty<InventoryDetailViewModel>();
 }
