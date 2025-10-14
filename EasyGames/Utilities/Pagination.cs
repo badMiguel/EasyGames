@@ -26,10 +26,11 @@ public class Pagination<T> : List<T>
         int? pageSize = null
     )
     {
-        int index = pageIndex ?? 1;
-        int size = pageSize ?? 10;
-
         var count = await source.CountAsync();
+
+        int index = pageIndex ?? 1;
+        int size = pageSize ?? (count < 5 ? 5 : 10);
+
         var items = await source.Skip((index - 1) * size).Take(size).ToListAsync();
         return new Pagination<T>(items, count, index, size);
     }
