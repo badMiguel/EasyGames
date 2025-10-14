@@ -41,7 +41,34 @@ namespace EasyGames.Controllers
                 return NotFound();
             }
 
-            return View(item);
+            var unitsSold = await _context
+                .OrderItem.Include(oi => oi.Inventory)
+                .ThenInclude(i => i.Item)
+                .Where(oi => oi.Inventory.ItemId == item.ItemId)
+                .SumAsync(oi => oi.Quantity);
+
+            var revenue = await _context
+                .OrderItem.Include(oi => oi.Inventory)
+                .ThenInclude(i => i.Item)
+                .Where(oi => oi.Inventory.ItemId == item.ItemId)
+                .SumAsync(oi => oi.Quantity * oi.UnitPrice);
+
+            var profit = await _context
+                .OrderItem.Include(oi => oi.Inventory)
+                .ThenInclude(i => i.Item)
+                .Where(oi => oi.Inventory.ItemId == item.ItemId)
+                .SumAsync(oi => oi.Quantity * (oi.UnitPrice - oi.UnitBuyPrice));
+
+            var itemDetailsOwner = new ItemDetailsOwnerViewModel
+            {
+                Item = item,
+                ItemId = item.ItemId,
+                Revenue = revenue,
+                TotalUnitsSold = unitsSold,
+                ProfitGenerated = profit,
+            };
+
+            return View(itemDetailsOwner);
         }
 
         // GET: Item/Create
