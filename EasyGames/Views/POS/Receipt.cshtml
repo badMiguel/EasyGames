@@ -1,0 +1,44 @@
+﻿@model EasyGames.Models.Order
+
+@{
+    ViewData["Title"] = "Receipt – " + Model.Shop?.ShopName;
+}
+
+<h3>Receipt – @Model.Shop?.ShopName</h3>
+<p><strong>Order ID:</strong> @Model.OrderId</p>
+<p><strong>Date:</strong> @Model.OrderDate?.ToLocalTime().ToString("g")</p>
+<p><strong>Customer:</strong> @(Model.Customer?.IsGuest == true ? "Guest" : "Registered Customer")</p>
+
+<table class="table table-bordered mt-3">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderItems)
+        {
+            <tr>
+                <td>@item.Inventory?.Item?.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("C")</td>
+                <td>@(item.Quantity * item.UnitPrice).ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{
+    var total = Model.OrderItems.Sum(i => i.Quantity * i.UnitPrice);
+}
+<div class="d-flex justify-content-between">
+    <strong>Total:</strong>
+    <span>@total.ToString("C")</span>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Index" asp-route-shopId="@Model.ShopId" class="btn btn-primary">New Sale</a>
+</div>

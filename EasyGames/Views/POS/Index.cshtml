@@ -1,0 +1,260 @@
+﻿@model IEnumerable<EasyGames.Models.Inventory>
+
+@{
+    ViewData["Title"] = "POS – " + (ViewBag.ShopName ?? "Shop");
+    var cart = ViewBag.Cart as List<EasyGames.Models.OrderItem> ?? new();
+}
+
+<div class="pos-wrapper">
+    <h3 class="mb-3">POS: @ViewBag.ShopName</h3>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <div class="pos-container">
+        <!-- Inventory -->
+        <div class="pos-inventory">
+            <div class="pos-search-bar">
+                <input type="text" id="searchInput" placeholder="Search products..." />
+            </div>
+
+            <div class="category-filters" id="categoryFilters">
+                <button class="active" data-category="all">All</button>
+                @foreach (var cat in ViewBag.Categories ?? new List<EasyGames.Models.Category>())
+                {
+                    <button data-category="@cat.Name">@cat.Name</button>
+                }
+            </div>
+
+            <div class="product-grid" id="productGrid">
+                @foreach (var inv in Model)
+                {
+                    <div class="product-card" data-category="@string.Join(",", inv.Item?.ItemCategorys?.Select(ic => ic.Category?.Name) ?? new List<string>())">
+                        <img src="~/images/image.jpg" alt="@inv.Item?.Name" />
+                        <div class="product-info">
+                            <h6>@inv.Item?.Name</h6>
+                            <div class="price">@inv.SellPrice.ToString("C")</div>
+                            <small class="text-muted">Stock: @inv.Quantity</small>
+                        </div>
+                        <form class="add-to-cart-form mt-2 w-100" data-inventory-id="@inv.InventoryId" asp-route-shopId="@inv.ShopId">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="quantity" value="1" />
+                            <button type="submit" class="btn btn-primary btn-sm w-100">Add to Cart</button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+ 
+
+        <!-- Cart -->
+        <div class="pos-cart">
+            <!-- Check if guest is a customer or not -->
+            <div class="cart-customer mb-3">
+                <label for="customerSearch" class="fw-semibold mb-1">Customer</label>
+                <div class="d-flex gap-2">
+                    <input type="text" id="customerSearch" class="form-control" placeholder="Search by name, phone, or email..." />
+                    <button type="button" id="clearCustomer" class="btn btn-outline-secondary">Clear</button>
+                </div>
+                <ul id="customerResults" class="list-group mt-2"></ul>
+                <input type="hidden" id="selectedCustomerId" name="customerId" />
+            </div>
+            <div class="cart-header">
+                <h5>Current Cart</h5>
+                <span>@cart.Count item(s)</span>
+            </div>
+
+            <div id="cartList" class="cart-list">
+                @if (!cart.Any())
+                {
+                    <div class="alert alert-info">Cart is empty – add items above to start.</div>
+                }
+                else
+                {
+                    foreach (var item in cart)
+                    {
+                        var inventory = Model.FirstOrDefault(i => i.InventoryId == item.InventoryId);
+                        var name = inventory?.Item?.Name ?? $"Item #{item.InventoryId}";
+
+                        <div class="cart-item">
+                            <div class="cart-item-name">@name</div>
+                            <div class="cart-item-controls">@item.Quantity × @item.UnitPrice.ToString("C")</div>
+                        </div>
+                    }
+                }
+            </div>
+
+            @{
+                var subtotal = cart.Sum(c => c.Quantity * c.UnitPrice);
+            }
+
+            <div class="cart-footer">
+                <div class="cart-total">Total: @subtotal.ToString("C")</div>
+                <div class="cart-actions">
+                    <form asp-action="ClearCart" asp-route-shopId="@ViewBag.ShopId" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-clear">Clear</button>
+                    </form>
+                    <form asp-action="Checkout" asp-route-shopId="@ViewBag.ShopId" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-checkout">Checkout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Category Filter
+            document.querySelectorAll("#categoryFilters button").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll("#categoryFilters button").forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+
+                    const cat = btn.dataset.category;
+                    document.querySelectorAll(".product-card").forEach(card => {
+                        if (cat === "all" || card.dataset.category.includes(cat))
+                            card.style.display = "block";
+                        else
+                            card.style.display = "none";
+                    });
+                });
+            });
+
+            // Search Filter
+            const searchInput = document.getElementById("searchInput");
+            searchInput.addEventListener("input", () => {
+                const query = searchInput.value.toLowerCase();
+                document.querySelectorAll(".product-card").forEach(card => {
+                    const name = card.querySelector("h6").textContent.toLowerCase();
+                    card.style.display = name.includes(query) ? "block" : "none";
+                });
+            });
+
+            // AJAX Add to Cart
+            document.querySelectorAll(".add-to-cart-form").forEach(form => {
+                form.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const shopId = "@ViewBag.ShopId";
+                    const inventoryId = form.dataset.inventoryId;
+                    const quantity = form.querySelector("input[name='quantity']").value;
+                    const token = form.querySelector("input[name='__RequestVerificationToken']").value;
+
+                    const response = await fetch(`/Shop/${shopId}/POS/AddToCart`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            "RequestVerificationToken": token
+                        },
+                        body: `inventoryId=${inventoryId}&quantity=${quantity}`
+                    });
+
+                    if (!response.ok) return alert("Failed to add item.");
+                    const data = await response.json();
+                    if (data.success) updateCartUI(data);
+                });
+            });
+
+            // Update Cart UI
+            function updateCartUI(data) {
+                const cartList = document.getElementById("cartList");
+                const cartHeader = document.querySelector(".cart-header span");
+                const cartTotal = document.querySelector(".cart-total");
+
+                if (!cartList) return;
+
+                cartList.innerHTML = "";
+                data.items.forEach(item => {
+                    cartList.innerHTML += `
+                        <div class="cart-item">
+                            <div class="cart-item-name">${item.itemName}</div>
+                            <div class="cart-item-controls">
+                                <button class="btn-minus" data-id="${item.inventoryId}">−</button>
+                                <span>${item.quantity} × ${item.unitPrice}</span>
+                            </div>
+                        </div>`;
+                });
+
+                cartHeader.textContent = `${data.cartCount} item(s)`;
+                cartTotal.textContent = `Total: ${data.subtotal}`;
+
+                document.querySelectorAll(".btn-minus").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const inventoryId = btn.dataset.id;
+                        updateQuantity(inventoryId);
+                    });
+                });
+            }
+
+            // Reduce quantity when user clicks the minus icon
+            async function updateQuantity(inventoryId) {
+                const shopId = "@ViewBag.ShopId";
+                const token = document.querySelector("input[name='__RequestVerificationToken']").value;
+
+                const response = await fetch(`/Shop/${shopId}/POS/RemoveOne`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "RequestVerificationToken": token
+                    },
+                    body: `inventoryId=${inventoryId}`
+                });
+
+                if (!response.ok) return alert("Failed to update quantity.");
+                const data = await response.json();
+                if (data.success) updateCartUI(data);
+            }
+
+			// Customer Search
+            const searchBox = document.getElementById("customerSearch");
+            const resultsList = document.getElementById("customerResults");
+            const hiddenId = document.getElementById("selectedCustomerId");
+            const clearCustomer = document.getElementById("clearCustomer");
+
+            searchBox.addEventListener("input", async () => {
+                const query = searchBox.value.trim();
+                if (query.length < 2) {
+                    resultsList.innerHTML = "";
+                    return;
+                }
+
+                const response = await fetch(`/Shop/@ViewBag.ShopId/POS/SearchCustomer?query=${encodeURIComponent(query)}`);
+                if (!response.ok) return;
+
+                const customers = await response.json();
+                resultsList.innerHTML = "";
+                customers.forEach(c => {
+                    const li = document.createElement("li");
+                    li.className = "list-group-item list-group-item-action";
+                    li.innerHTML = `
+                        <div><strong>${c.name}</strong> <span class="text-muted small">(${c.status})</span></div>
+                        <div class="small text-muted">
+                            ${c.email ?? ""} ${c.phone ?? ""}
+                            <span class="float-end">${c.points} pts</span>
+                        </div>
+                    `;
+                    li.addEventListener("click", () => {
+                        hiddenId.value = c.customerId;
+                        searchBox.value = `${c.name} (${c.status})`;
+                        resultsList.innerHTML = "";
+                    });
+                    resultsList.appendChild(li);
+                });
+            });
+
+            clearCustomer.addEventListener("click", () => {
+                searchBox.value = "";
+                hiddenId.value = "";
+                resultsList.innerHTML = "";
+        });
+    </script>
+}
