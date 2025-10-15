@@ -46,6 +46,7 @@ public class UserSales : Controller
             .ThenInclude(oi => oi.Inventory)
             .ThenInclude(i => i.Item)
             .Where(o => o.Status == OrderStatus.Ordered)
+            .OrderByDescending(o => o.OrderDate)
             .Select(o => new UserTransactionViewModel
             {
                 Order = o,
