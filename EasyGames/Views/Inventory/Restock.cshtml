@@ -1,0 +1,152 @@
+﻿@model IEnumerable<EasyGames.Models.Inventory>
+@{
+    ViewData["Title"] = "Restock from Owner";
+    var shopId = ViewData["ShopId"];
+    var shopName = ViewData["ShopName"];
+}
+
+<div class="container mt-4">
+    <div class="mb-4">
+        <h1>Restock from Owner</h1>
+        <p class="text-muted">Transfer items from Online Shop to @shopName</p>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            <h4>No Items Available</h4>
+            <p>The online shop currently has no items in stock. Please contact the owner to add inventory.</p>
+            <a asp-action="Index" asp-route-shopId="@shopId" class="btn btn-secondary">Back to Inventory</a>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="Restock" method="post">
+                    <input type="hidden" name="shopId" value="@shopId" />
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Item to Restock</label>
+                        <select name="onlineInventoryId" class="form-select" id="itemSelect" required>
+                            <option value="">-- Select an item --</option>
+                            @foreach (var item in Model)
+                            {
+                                <option value="@item.InventoryId"
+                                        data-item-name="@item.Item.Name"
+                                        data-available="@item.Quantity"
+                                        data-price="@item.SellPrice.ToString("C")">
+                                    @item.Item.Name (@item.Quantity available)
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <div id="itemDetails" style="display: none;" class="mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title" id="selectedItemName">Item Name</h5>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-4">Available in Online Shop:</dt>
+                                    <dd class="col-sm-8" id="availableQuantity">0</dd>
+
+                                    <dt class="col-sm-4">Sell Price:</dt>
+                                    <dd class="col-sm-8" id="sellPrice">$0.00</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="quantity" class="form-label fw-bold">Quantity to Transfer</label>
+                        <input type="number"
+                               class="form-control"
+                               id="quantity"
+                               name="quantity"
+                               min="1"
+                               required
+                               placeholder="Enter quantity">
+                        <div class="form-text">Enter the number of units to transfer from online shop to your shop.</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fa-solid fa-box"></i> Restock Item
+                        </button>
+                        <a asp-action="Index" asp-route-shopId="@shopId" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h4>Items Available from Online Shop</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Description</th>
+                            <th class="text-end">Available Quantity</th>
+                            <th class="text-end">Sell Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@item.Item.Name</td>
+                                <td class="text-muted">@item.Item.Description</td>
+                                <td class="text-end">@item.Quantity</td>
+                                <td class="text-end">@item.SellPrice.ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('itemSelect').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const itemDetails = document.getElementById('itemDetails');
+
+            if (this.value) {
+                // Show item details
+                document.getElementById('selectedItemName').textContent = selectedOption.getAttribute('data-item-name');
+                document.getElementById('availableQuantity').textContent = selectedOption.getAttribute('data-available') + ' units';
+                document.getElementById('sellPrice').textContent = selectedOption.getAttribute('data-price');
+
+                // Set max quantity for input
+                const quantityInput = document.getElementById('quantity');
+                quantityInput.max = selectedOption.getAttribute('data-available');
+                quantityInput.value = '';
+
+                itemDetails.style.display = 'block';
+            } else {
+                itemDetails.style.display = 'none';
+            }
+        });
+    </script>
+}

@@ -410,6 +410,145 @@ namespace EasyGames.Controllers
             return RedirectToAction(nameof(Index), new { shopId = inventory.ShopId });
         }
 
+        // GET: Shop/{shopId}/Inventory/Restock
+        [HttpGet("Restock")]
+        public async Task<IActionResult> Restock(int shopId)
+        {
+            // Authorization check
+            if (!IsOwnerOfShop(shopId))
+                return Forbid();
+
+            // Get the physical shop
+            var shop = await _context.Shop.FindAsync(shopId);
+            if (shop == null)
+                return NotFound();
+
+            // Only allow restocking for physical shops
+            if (shop.LocationType != LocationTypes.Physical)
+            {
+                TempData["Error"] = "Only physical shops can restock from the owner.";
+                return RedirectToAction(nameof(Index), new { shopId });
+            }
+
+            // Get the online shop (owner's main inventory)
+            var onlineShop = await _context.Shop
+                .FirstOrDefaultAsync(s => s.LocationType == LocationTypes.Online);
+
+            if (onlineShop == null)
+            {
+                TempData["Error"] = "Online shop not found. Cannot restock.";
+                return RedirectToAction(nameof(Index), new { shopId });
+            }
+
+            // Get items available in online shop with stock > 0
+            var onlineInventory = await _context.Inventory
+                .Include(i => i.Item)
+                .Where(i => i.ShopId == onlineShop.ShopId && i.Quantity > 0)
+                .OrderBy(i => i.Item.Name)
+                .ToListAsync();
+
+            // Prepare data for the view
+            ViewData["ShopId"] = shopId;
+            ViewData["ShopName"] = shop.ShopName;
+            ViewData["OnlineShopId"] = onlineShop.ShopId;
+
+            // Create SelectList for dropdown
+            ViewData["AvailableItems"] = new SelectList(
+                onlineInventory.Select(i => new
+                {
+                    InventoryId = i.InventoryId,
+                    DisplayText = $"{i.Item.Name} ({i.Quantity} available)"
+                }),
+                "InventoryId",
+                "DisplayText"
+            );
+
+            return View(onlineInventory);
+        }
+
+        // POST: Shop/{shopId}/Inventory/Restock
+        [HttpPost("Restock")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restock(int shopId, int onlineInventoryId, int quantity)
+        {
+            // Authorization check
+            if (!IsOwnerOfShop(shopId))
+                return Forbid();
+
+            // Validate input
+            if (quantity <= 0)
+            {
+                TempData["Error"] = "Quantity must be greater than 0.";
+                return RedirectToAction(nameof(Restock), new { shopId });
+            }
+
+            // Get the physical shop
+            var physicalShop = await _context.Shop.FindAsync(shopId);
+            if (physicalShop == null || physicalShop.LocationType != LocationTypes.Physical)
+            {
+                TempData["Error"] = "Invalid physical shop.";
+                return RedirectToAction(nameof(Index), new { shopId });
+            }
+
+            // Get the online shop inventory item
+            var onlineInventory = await _context.Inventory
+                .Include(i => i.Item)
+                .Include(i => i.Shop)
+                .FirstOrDefaultAsync(i => i.InventoryId == onlineInventoryId);
+
+            if (onlineInventory == null)
+            {
+                TempData["Error"] = "Item not found in online shop.";
+                return RedirectToAction(nameof(Restock), new { shopId });
+            }
+
+            // Validate online shop has this item
+            if (onlineInventory.Shop.LocationType != LocationTypes.Online)
+            {
+                TempData["Error"] = "Invalid online shop inventory.";
+                return RedirectToAction(nameof(Restock), new { shopId });
+            }
+
+            // Validate sufficient quantity available
+            if (onlineInventory.Quantity < quantity)
+            {
+                TempData["Error"] = $"Insufficient stock. Only {onlineInventory.Quantity} units of '{onlineInventory.Item.Name}' available in online shop.";
+                return RedirectToAction(nameof(Restock), new { shopId });
+            }
+
+            // Check if physical shop already has this item
+            var physicalInventory = await _context.Inventory
+                .FirstOrDefaultAsync(i => i.ShopId == shopId && i.ItemId == onlineInventory.ItemId);
+
+            if (physicalInventory != null)
+            {
+                // Item exists - Add to existing quantity
+                physicalInventory.Quantity += quantity;
+            }
+            else
+            {
+                // Item doesn't exist - Create new inventory record
+                // Inherit sell price from online shop
+                physicalInventory = new Inventory
+                {
+                    ShopId = shopId,
+                    ItemId = onlineInventory.ItemId,
+                    SellPrice = onlineInventory.SellPrice, // Auto-inherit price
+                    Quantity = quantity
+                };
+                _context.Inventory.Add(physicalInventory);
+            }
+
+            // Decrease online shop inventory
+            onlineInventory.Quantity -= quantity;
+
+            // Save changes
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = $"Successfully restocked {quantity} units of '{onlineInventory.Item.Name}' from online shop.";
+            return RedirectToAction(nameof(Index), new { shopId });
+        }
+
         private bool InventoryExists(int id)
         {
             return _context.Inventory.Any(e => e.InventoryId == id);
