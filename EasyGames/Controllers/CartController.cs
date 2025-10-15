@@ -272,12 +272,12 @@ public class CartController : Controller
 
     public async Task<IActionResult> ViewCart()
     {
-        // bool isLoggedIn = User.Identity?.IsAuthenticated ?? false;
+        bool isLoggedIn = User.Identity?.IsAuthenticated ?? false;
 
-        // if (!isLoggedIn)
-        // {
-        //     return RedirectToPage("/Account/Login", new { area = "Identity" });
-        // }
+        if (!isLoggedIn)
+        {
+            return RedirectToPage("/Account/Login", new { area = "Identity" });
+        }
 
         int orderId = await GetUserOrderId();
         var orderItems = GetOrderedItems(orderId);
@@ -358,6 +358,39 @@ public class CartController : Controller
             await _context.SaveChangesAsync();
 
             await DecrementStockAmount(orderId);
+
+            // ---- Award points to logged-in user (guests get none) ----
+            try
+            {
+                // Load the order again with relations we need
+                var fullOrder = await _context.Order
+                    .Include(o => o.Customer)
+                    .Include(o => o.OrderItems)
+                    .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+                var userId = fullOrder?.Customer?.UserId;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    // Calculate subtotal and points
+                    var subtotal = fullOrder!.OrderItems.Sum(oi => oi.UnitPrice * oi.Quantity);
+                    var earnedPoints = (int)Math.Floor(subtotal / 10m); // 1 point per $10
+
+                    if (earnedPoints > 0)
+                    {
+                        var user = await _userManager.FindByIdAsync(userId);
+                        if (user != null)
+                        {
+                            user.AccountPoints += earnedPoints;
+                            await _userManager.UpdateAsync(user);
+                            TempData["PointsEarned"] = earnedPoints; // optional UI message
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // swallow points errors so checkout still succeeds
+            }
 
             TempData["OrderId"] = orderId;
             return RedirectToAction("OrderSummary");
