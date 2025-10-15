@@ -24,10 +24,10 @@ public static class UserStatus
 
 public static class StatusPoints
 {
-    public const int Bronze = 500;
-    public const int Silver = 1_000;
-    public const int Gold = 5_000;
-    public const int Platinum = 10_000;
+    public const int Bronze = 1;     // 1+ points
+    public const int Silver = 50;    // 50+
+    public const int Gold = 150;     // 150+
+    public const int Platinum = 300; // 300+
 
     public static readonly int[] AllPoints = { Bronze, Silver, Gold, Platinum };
 }

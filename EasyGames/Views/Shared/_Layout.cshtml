@@ -79,6 +79,12 @@
                                 </div>
                             }
                         }
+                        @if (User.Identity?.IsAuthenticated ?? false)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Status" asp-action="Index">My Account</a>
+                            </li>
+                        }
                     </ul>
                     @await Component.InvokeAsync("CartSummary")
                     <partial name="_LoginPartial" />
