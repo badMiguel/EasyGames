@@ -1,4 +1,4 @@
-@model IEnumerable<EasyGames.Models.OrderItem>
+﻿@model IEnumerable<EasyGames.Models.OrderItem>
 
 @{
     ViewData["Title"] = "Summary";
@@ -9,6 +9,13 @@
     <i class="fa-solid fa-circle-check" style="color: #63E6BE; font-size: 5rem;"></i>
     <h1>Thank You For you Purchase!</h1>
     <p>Your order number is #@ViewData["OrderId"]</p>
+    @if (TempData["PointsEarned"] != null)
+    {
+        <div class="alert alert-success text-center mt-3" style="max-width: 400px;">
+            🎉 You earned <strong>@TempData["PointsEarned"]</strong> points from this order!
+        </div>
+    }
+
 </div>
 <div class="container" style="max-width: 800px;">
     @foreach(var orderItem in Model) 

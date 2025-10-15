@@ -35,38 +35,27 @@
         </div>
         <p>Production Date: @Model.Item.ProductionDate.ToString("yyyy-MM-dd")</p>
         <p>Stock Left: @Model.Inventory.Quantity</p>
-        @{
-        if (User.Identity?.IsAuthenticated ?? false) {
-            <form asp-controller="Cart" method="POST" class="d-flex gap-3 mt-5">
-                <input type="hidden" asp-for="@Model.ItemId" />
-                <input type="hidden" asp-for="@Model.Inventory.InventoryId" />
+        <form asp-controller="Cart" method="POST" class="d-flex gap-3 mt-5">
+            <input type="hidden" asp-for="@Model.ItemId" />
+            <input type="hidden" asp-for="@Model.Inventory.InventoryId" />
 
-                <div class="flex-grow-1">
-                    <label for="quantity" class="form-label">Quantity</label>
-                    <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="@Model.Inventory.Quantity">
-                </div>
+            <div class="flex-grow-1">
+                <label for="quantity" class="form-label">Quantity</label>
+                <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="@Model.Inventory.Quantity">
+            </div>
 
-                @if (Model.Inventory.Quantity < 1)
-                {   
-                    <input type="submit" value="Add To Cart" formaction="/Cart/AddToCart" class="disabled btn btn-outline-primary btn-lg" />
-                    <input type="submit" value="Buy Now" formaction="/Cart/BuyNow" class="disabled btn btn-primary btn-lg" />
-                }
-                else 
-                {
-                    <input type="submit" value="Add To Cart" formaction="/Cart/AddToCart" class="btn btn-outline-primary btn-lg" />
-                    <input type="submit" value="Buy Now" formaction="/Cart/BuyNow" class="btn btn-primary btn-lg" />
-                }
-            </form>
-        } 
-        else
-        {
-            <p class="fst-italic">
-                Please 
-                <a asp-area="Identity" asp-page="/Account/Login" class="text-dark">login</a>
-                to start buying items.
-            </p>
-        }
-        }
+            @if (Model.Inventory.Quantity < 1)
+            {
+                <input type="submit" value="Add To Cart" formaction="/Cart/AddToCart" class="disabled btn btn-outline-primary btn-lg" />
+                <input type="submit" value="Buy Now" formaction="/Cart/BuyNow" class="disabled btn btn-primary btn-lg" />
+            }
+            else
+            {
+                <input type="submit" value="Add To Cart" formaction="/Cart/AddToCart" class="btn btn-outline-primary btn-lg" />
+                <input type="submit" value="Buy Now" formaction="/Cart/BuyNow" class="btn btn-primary btn-lg" />
+            }
+        </form>
+
     </div>
 </div>
 

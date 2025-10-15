@@ -32,6 +32,13 @@ builder
     .AddEntityFrameworkStores<EasyGamesContext>();
 
 // Add services to the container.
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+builder.Services.AddHttpContextAccessor(); // handy if we need it later
 builder.Services.AddControllersWithViews();
 
 // For email service
@@ -61,6 +68,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
