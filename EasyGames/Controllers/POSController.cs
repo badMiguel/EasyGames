@@ -89,7 +89,6 @@ namespace EasyGames.Controllers
 
   
         [HttpPost("AddToCart")]
-        [ActionName("AddToCartAjax")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToCartAjax(int shopId, int inventoryId, int quantity = 1)
         {

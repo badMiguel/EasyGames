@@ -38,8 +38,13 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-builder.Services.AddHttpContextAccessor(); // handy if we need it later
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-RequestVerificationToken";
+});
 
 // For email service
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));

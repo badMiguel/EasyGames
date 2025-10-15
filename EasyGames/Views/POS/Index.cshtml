@@ -42,8 +42,9 @@
                             <div class="price">@inv.SellPrice.ToString("C")</div>
                             <small class="text-muted">Stock: @inv.Quantity</small>
                         </div>
-                        <form class="add-to-cart-form mt-2 w-100" data-inventory-id="@inv.InventoryId" asp-route-shopId="@inv.ShopId">
+                        <form action="/Shop/@inv.ShopId/POS/AddToCart" method="post" class="add-to-cart-form">
                             @Html.AntiForgeryToken()
+                            <input type="hidden" name="inventoryId" value="@inv.InventoryId" />
                             <input type="hidden" name="quantity" value="1" />
                             <button type="submit" class="btn btn-primary btn-sm w-100">Add to Cart</button>
                         </form>
