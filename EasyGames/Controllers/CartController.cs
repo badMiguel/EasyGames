@@ -164,17 +164,32 @@ public class CartController : Controller
         ItemDetailsUserViewModel itemDetails,
         int quantity,
         int orderId,
-        decimal unitPrice,
-        decimal unitBuyPrice
+        decimal unitPrice,      // raw SellPrice from Inventory
+        decimal unitBuyPrice    // cost price (no discount)
     )
     {
+        // default = no discount (guest user)
+        decimal finalUnitPrice = unitPrice;
+
+        // if logged in, apply tier discount using ApplicationUser.AccountPoints
+        var userId = _userManager.GetUserId(User);
+        if (!string.IsNullOrEmpty(userId))
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                // uses Models/DiscountHelper we created
+                finalUnitPrice = DiscountHelper.ApplyDiscount(unitPrice, user.AccountPoints);
+            }
+        }
+
         await _context.OrderItem.AddAsync(
             new OrderItem
             {
                 OrderId = orderId,
                 InventoryId = itemDetails.Inventory.InventoryId,
-                UnitPrice = unitPrice,
-                UnitBuyPrice = unitBuyPrice,
+                UnitPrice = finalUnitPrice,   // <-- discounted price if logged in
+                UnitBuyPrice = unitBuyPrice,  // <-- never discounted
                 Quantity = quantity,
             }
         );
