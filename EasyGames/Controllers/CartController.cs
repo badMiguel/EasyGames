@@ -4,19 +4,27 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace EasyGames.Controllers;
 
-[Authorize]
+// [Authorize]
 public class CartController : Controller
 {
     private readonly EasyGamesContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public CartController(UserManager<ApplicationUser> userManager, EasyGamesContext context)
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private const string GuestCustomerSessionKey = "GuestCustomerId";
+
+    public CartController(
+        UserManager<ApplicationUser> userManager,
+        EasyGamesContext context,
+        IHttpContextAccessor httpContextAccessor)
     {
         _context = context;
         _userManager = userManager;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     [HttpPost]
@@ -65,6 +73,51 @@ public class CartController : Controller
         }
         return null;
     }
+
+    private async Task<Customer> GetOrCreateCustomerAsync()
+    {
+        // If logged in, use existing logic
+        var loggedInUserId = _userManager.GetUserId(User);
+        if (!string.IsNullOrEmpty(loggedInUserId))
+        {
+            var existing = await _context.Customer.FirstOrDefaultAsync(c => c.UserId == loggedInUserId);
+            if (existing == null)
+            {
+                existing = new Customer
+                {
+                    UserId = loggedInUserId,
+                    IsGuest = false
+                };
+                _context.Customer.Add(existing);
+                await _context.SaveChangesAsync();
+            }
+            return existing;
+        }
+
+        // Guest path
+        var session = _httpContextAccessor.HttpContext!.Session;
+        var guestId = session.GetInt32(GuestCustomerSessionKey);
+        Customer? guest = null;
+
+        if (guestId.HasValue)
+        {
+            guest = await _context.Customer.FindAsync(guestId.Value);
+        }
+
+        if (guest == null)
+        {
+            guest = new Customer
+            {
+                IsGuest = true
+            };
+            _context.Customer.Add(guest);
+            await _context.SaveChangesAsync();
+            session.SetInt32(GuestCustomerSessionKey, guest.CustomerId);
+        }
+
+        return guest;
+    }
+
 
     private async Task<bool> OrderItemExists(ItemDetailsUserViewModel itemDetails, int quantity)
     {
@@ -151,12 +204,27 @@ public class CartController : Controller
 
     private async Task<int> GetUserOrderId()
     {
-        var customer = await GetCustomer();
-        var shop = await GetOnlineShop();
+        // Use the new helper (works for logged-in AND guest)
+        var customer = await GetOrCreateCustomerAsync();
 
-        var order = _context.Order.FirstOrDefault(o =>
-            o.Status == OrderStatus.InCart && o.CustomerId == customer.CustomerId
-        );
+        // Ensure there is an Online shop to attach the cart to
+        var shop = await GetOnlineShop();
+        if (shop == null)
+        {
+            shop = new Shop
+            {
+                ShopName = "Web Storefront",
+                ContactNumber = "0000 000 000", // placeholder to satisfy [Required]
+                LocationType = LocationTypes.Online
+            };
+            _context.Shop.Add(shop);
+            await _context.SaveChangesAsync();
+        }
+
+        // Reuse an existing "in cart" order or create a new one
+        var order = await _context.Order
+            .FirstOrDefaultAsync(o => o.Status == OrderStatus.InCart
+                                   && o.CustomerId == customer.CustomerId);
 
         if (order != null)
         {
@@ -167,10 +235,11 @@ public class CartController : Controller
         {
             CustomerId = customer.CustomerId,
             ShopId = shop.ShopId,
-            Status = OrderStatus.InCart,
+            Status = OrderStatus.InCart
         };
-        await _context.Order.AddAsync(newOrder);
+        _context.Order.Add(newOrder);
         await _context.SaveChangesAsync();
+
         return newOrder.OrderId;
     }
 
@@ -203,12 +272,12 @@ public class CartController : Controller
 
     public async Task<IActionResult> ViewCart()
     {
-        bool isLoggedIn = User.Identity?.IsAuthenticated ?? false;
+        // bool isLoggedIn = User.Identity?.IsAuthenticated ?? false;
 
-        if (!isLoggedIn)
-        {
-            return RedirectToPage("/Account/Login", new { area = "Identity" });
-        }
+        // if (!isLoggedIn)
+        // {
+        //     return RedirectToPage("/Account/Login", new { area = "Identity" });
+        // }
 
         int orderId = await GetUserOrderId();
         var orderItems = GetOrderedItems(orderId);
