@@ -5,11 +5,14 @@ using EasyGames.Data;
 using EasyGames.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 public class CartSummaryViewComponent : ViewComponent
 {
     private readonly EasyGamesContext _context;
     private readonly IHttpContextAccessor _httpContextAccessor;
+
+    private const string GuestCustomerSessionKey = "GuestCustomerId";
 
     public CartSummaryViewComponent(
         EasyGamesContext context,
@@ -36,21 +39,25 @@ public class CartSummaryViewComponent : ViewComponent
 
     private async Task<int> GetUserOrderId()
     {
+        // 1) Try logged-in customer first
         var customer = await GetCustomer();
-        if (customer == null)
+        int? customerId = customer?.CustomerId;
+
+        // 2) If not logged in, try guest id from Session
+        if (customerId == null)
         {
-            return -1;
+            var sess = _httpContextAccessor.HttpContext?.Session;
+            customerId = sess?.GetInt32(GuestCustomerSessionKey);
         }
 
-        var order = await _context.Order.FirstOrDefaultAsync(o =>
-            o.Status == OrderStatus.InCart && o.CustomerId == customer.CustomerId
-        );
-
-        if (order == null)
-        {
+        if (customerId == null)
             return -1;
-        }
-        return order.OrderId;
+
+        var order = await _context.Order
+            .FirstOrDefaultAsync(o => o.Status == OrderStatus.InCart
+                                   && o.CustomerId == customerId.Value);
+
+        return order?.OrderId ?? -1;
     }
 
     public async Task<IViewComponentResult> InvokeAsync()
