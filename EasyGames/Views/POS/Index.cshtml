@@ -74,7 +74,7 @@
             <div id="cartList" class="cart-list">
                 @if (!cart.Any())
                 {
-                    <div class="alert alert-info">Cart is empty – add items above to start.</div>
+                    <div class="alert alert-info">Cart is empty – add items to start.</div>
                 }
                 else
                 {
@@ -141,23 +141,24 @@
                 });
             });
 
-            // AJAX Add to Cart
+            //  Add to Cart
             document.querySelectorAll(".add-to-cart-form").forEach(form => {
                 form.addEventListener("submit", async (e) => {
-                    e.preventDefault();
-                    const shopId = "@ViewBag.ShopId";
-                    const inventoryId = form.dataset.inventoryId;
+                    e.preventDefault(); 
+
+                    const actionUrl = form.getAttribute("action");
+                    const inventoryId = form.querySelector("input[name='inventoryId']").value;
                     const quantity = form.querySelector("input[name='quantity']").value;
                     const token = form.querySelector("input[name='__RequestVerificationToken']").value;
-
-                    const response = await fetch(`/Shop/${shopId}/POS/AddToCart`, {
+                    const shopId = "@ViewBag.ShopId";
+                    const response = await fetch(actionUrl, {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/x-www-form-urlencoded",
-                            "RequestVerificationToken": token
+                            "X-RequestVerificationToken": token
                         },
                         body: `inventoryId=${inventoryId}&quantity=${quantity}`
-                    });
+                                });
 
                     if (!response.ok) return alert("Failed to add item.");
                     const data = await response.json();
@@ -196,7 +197,7 @@
                 });
             }
 
-            // Reduce quantity when user clicks the minus icon
+            // Reduce quantity
             async function updateQuantity(inventoryId) {
                 const shopId = "@ViewBag.ShopId";
                 const token = document.querySelector("input[name='__RequestVerificationToken']").value;
@@ -205,7 +206,7 @@
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
-                        "RequestVerificationToken": token
+                        "X-RequestVerificationToken": token
                     },
                     body: `inventoryId=${inventoryId}`
                 });
@@ -215,7 +216,7 @@
                 if (data.success) updateCartUI(data);
             }
 
-			// Customer Search
+            // Customer Search
             const searchBox = document.getElementById("customerSearch");
             const resultsList = document.getElementById("customerResults");
             const hiddenId = document.getElementById("selectedCustomerId");
@@ -256,6 +257,7 @@
                 searchBox.value = "";
                 hiddenId.value = "";
                 resultsList.innerHTML = "";
+            });
         });
     </script>
 }
