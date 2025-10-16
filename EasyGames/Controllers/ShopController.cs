@@ -98,11 +98,36 @@ namespace EasyGames.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Prevent creating a second online shop
+                if (shop.LocationType == LocationTypes.Online)
+                {
+                    var existingOnlineShop = await _context.Shop
+                        .AnyAsync(s => s.LocationType == LocationTypes.Online);
+
+                    if (existingOnlineShop)
+                    {
+                        ModelState.AddModelError("LocationType",
+                            "An Online Shop already exists. There can only be one Online Shop in the system. Please select 'Physical' location type instead.");
+
+                        ViewData["LocationType"] = new SelectList(
+                            Enum.GetValues(typeof(LocationTypes)),
+                            shop.LocationType
+                        );
+                        ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
+                        return View(shop);
+                    }
+                }
+
                 _context.Add(shop);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "Id", shop.OwnerId);
+
+            ViewData["LocationType"] = new SelectList(
+                Enum.GetValues(typeof(LocationTypes)),
+                shop.LocationType
+            );
+            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
             return View(shop);
         }
 
@@ -147,6 +172,43 @@ namespace EasyGames.Controllers
 
             if (ModelState.IsValid)
             {
+                // Get the original shop from database
+                var originalShop = await _context.Shop.AsNoTracking().FirstOrDefaultAsync(s => s.ShopId == id);
+
+                if (originalShop == null)
+                {
+                    return NotFound();
+                }
+
+                // Prevent changing frm Online to Physical
+                if (originalShop.LocationType == LocationTypes.Online && shop.LocationType == LocationTypes.Physical)
+                {
+                    ModelState.AddModelError("LocationType",
+                        "Cannot change the Online Shop to a Physical shop. The Online Shop is the main inventory source for all physical shops.");
+
+                    ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)), shop.LocationType);
+                    ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
+                    return View(shop);
+                }
+
+                // Prevent changing to online if an online shop already exists
+                if (originalShop.LocationType == LocationTypes.Physical && shop.LocationType == LocationTypes.Online)
+                {
+                    // Check if an online shop already exists
+                    var existingOnlineShop = await _context.Shop
+                        .AnyAsync(s => s.LocationType == LocationTypes.Online && s.ShopId != id);
+
+                    if (existingOnlineShop)
+                    {
+                        ModelState.AddModelError("LocationType",
+                            "Cannot change this shop to Online. This is because an online Shop already exists. There can only be one Online Shop in the system.");
+
+                        ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)), shop.LocationType);
+                        ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
+                        return View(shop);
+                    }
+                }
+
                 try
                 {
                     _context.Update(shop);
@@ -165,7 +227,9 @@ namespace EasyGames.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "Id", shop.OwnerId);
+
+            ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)), shop.LocationType);
+            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
             return View(shop);
         }
 
