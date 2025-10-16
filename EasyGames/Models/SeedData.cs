@@ -30,10 +30,12 @@ public static class SeedData
 
             var ownerEmail = "owner@email.com";
             var shopProprietorEmail = "shop@email.com";
+            var shopProprietorEmail2 = "shop@email2.com";
             var customerEmail = "customer@email.com";
 
             var owner = await userManager.FindByEmailAsync(ownerEmail);
             var shopProprietor = await userManager.FindByEmailAsync(shopProprietorEmail);
+            var shopProprietor2 = await userManager.FindByEmailAsync(shopProprietorEmail2);
             var customer = await userManager.FindByEmailAsync(customerEmail);
 
             var newCustomer = new ApplicationUser
@@ -71,6 +73,25 @@ public static class SeedData
                 if (!await userManager.IsInRoleAsync(newShopProprietor, UserRoles.ShopProprietor))
                 {
                     await userManager.AddToRoleAsync(newShopProprietor, UserRoles.ShopProprietor);
+                }
+            }
+
+            var newShopProprietor2 = new ApplicationUser
+            {
+                UserName = shopProprietorEmail2,
+                Email = shopProprietorEmail2,
+                EmailConfirmed = true,
+            };
+            if (shopProprietor == null)
+            {
+                await userManager.CreateAsync(newShopProprietor2, "Shop123.");
+                await userManager.AddToRoleAsync(newShopProprietor2, UserRoles.ShopProprietor);
+            }
+            else
+            {
+                if (!await userManager.IsInRoleAsync(newShopProprietor2, UserRoles.ShopProprietor))
+                {
+                    await userManager.AddToRoleAsync(newShopProprietor2, UserRoles.ShopProprietor);
                 }
             }
 

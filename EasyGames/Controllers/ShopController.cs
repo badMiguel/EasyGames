@@ -44,6 +44,7 @@ namespace EasyGames.Controllers
         {
             var shop = _context.Shop.Include(s => s.Owner).AsNoTracking();
             var paginatedShop = await Pagination<Shop>.CreateAsync(shop, pageNumber, pageSize);
+
             ViewData["PageDetails"] = new PageDetails
             {
                 PageSize = paginatedShop.PageSize,
@@ -51,6 +52,7 @@ namespace EasyGames.Controllers
                 HasNextPage = paginatedShop.HasNextPage,
                 HasPreviousPage = paginatedShop.HasPreviousPage,
             };
+
             return View(paginatedShop);
         }
 
@@ -77,28 +79,89 @@ namespace EasyGames.Controllers
         }
 
         // GET: Shop/Create
-        public IActionResult Create()
+        // ADDED: Only Owner can create shops
+        [Authorize(Roles = UserRoles.Owner)]
+        public async Task<IActionResult> Create()
         {
             ViewData["LocationType"] = new SelectList(
                 Enum.GetValues(typeof(LocationTypes)),
                 LocationTypes.Physical
             );
-            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName");
+
+            // Get users who don't already own a shop AND have Owner or ShopProprietor role
+            var usersWithShops = _context.Shop.Select(s => s.OwnerId).ToList();
+            var allUsers = await _context.Users.ToListAsync();
+
+            var availableUsers = new List<object>();
+
+            foreach (var user in allUsers)
+            {
+                if (usersWithShops.Contains(user.Id))
+                    continue;
+
+                var roles = await _context.UserRoles
+                    .Where(ur => ur.UserId == user.Id)
+                    .Join(_context.Roles,
+                        ur => ur.RoleId,
+                        r => r.Id,
+                        (ur, r) => r.Name)
+                    .ToListAsync();
+
+                if (roles.Contains(UserRoles.Owner) || roles.Contains(UserRoles.ShopProprietor))
+                {
+                    availableUsers.Add(new { user.Id, user.UserName });
+                }
+            }
+
+            ViewData["OwnerId"] = new SelectList(availableUsers, "Id", "UserName");
+            ViewData["HasAvailableUsers"] = availableUsers.Any();
+
             return View();
         }
 
         // POST: Shop/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // ADDED: Only Owner can create shops
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Owner)]
         public async Task<IActionResult> Create(
             [Bind("ShopId,ShopName,ContactNumber,LocationType,Address,OwnerId")] Shop shop
         )
         {
             if (ModelState.IsValid)
             {
-                // Prevent creating a second online shop
+                // Check if user already owns a shop
+                var userAlreadyOwnsShop = await _context.Shop
+                    .AnyAsync(s => s.OwnerId == shop.OwnerId);
+
+                if (userAlreadyOwnsShop)
+                {
+                    ModelState.AddModelError("OwnerId",
+                        "This user already owns a shop. Each user can only own one shop.");
+
+                    await RebuildCreateViewData(shop);
+                    return View(shop);
+                }
+
+                // Check if selected user has appropriate role
+                var userRoles = await _context.UserRoles
+                    .Where(ur => ur.UserId == shop.OwnerId)
+                    .Join(_context.Roles,
+                        ur => ur.RoleId,
+                        r => r.Id,
+                        (ur, r) => r.Name)
+                    .ToListAsync();
+
+                if (!userRoles.Contains(UserRoles.Owner) && !userRoles.Contains(UserRoles.ShopProprietor))
+                {
+                    ModelState.AddModelError("OwnerId",
+                        "Only users with Owner or Shop Proprietor role can own shops.");
+
+                    await RebuildCreateViewData(shop);
+                    return View(shop);
+                }
+
+                // VALIDATION 3: Prevent creating a second online shop
                 if (shop.LocationType == LocationTypes.Online)
                 {
                     var existingOnlineShop = await _context.Shop
@@ -107,13 +170,9 @@ namespace EasyGames.Controllers
                     if (existingOnlineShop)
                     {
                         ModelState.AddModelError("LocationType",
-                            "An Online Shop already exists. There can only be one Online Shop in the system. Please select 'Physical' location type instead.");
+                            "An Online Shop already exists. Only one Online Shop is allowed in the system. Please select 'Physical' location type instead.");
 
-                        ViewData["LocationType"] = new SelectList(
-                            Enum.GetValues(typeof(LocationTypes)),
-                            shop.LocationType
-                        );
-                        ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
+                        await RebuildCreateViewData(shop);
                         return View(shop);
                     }
                 }
@@ -123,12 +182,43 @@ namespace EasyGames.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            await RebuildCreateViewData(shop);
+            return View(shop);
+        }
+
+        // Helper method to rebuild ViewData
+        private async Task RebuildCreateViewData(Shop shop)
+        {
+            var usersWithShops = _context.Shop.Select(s => s.OwnerId).ToList();
+            var allUsers = await _context.Users.ToListAsync();
+
+            var availableUsers = new List<object>();
+
+            foreach (var user in allUsers)
+            {
+                if (usersWithShops.Contains(user.Id))
+                    continue;
+
+                var roles = await _context.UserRoles
+                    .Where(ur => ur.UserId == user.Id)
+                    .Join(_context.Roles,
+                        ur => ur.RoleId,
+                        r => r.Id,
+                        (ur, r) => r.Name)
+                    .ToListAsync();
+
+                if (roles.Contains(UserRoles.Owner) || roles.Contains(UserRoles.ShopProprietor))
+                {
+                    availableUsers.Add(new { user.Id, user.UserName });
+                }
+            }
+
             ViewData["LocationType"] = new SelectList(
                 Enum.GetValues(typeof(LocationTypes)),
                 shop.LocationType
             );
-            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
-            return View(shop);
+            ViewData["OwnerId"] = new SelectList(availableUsers, "Id", "UserName", shop.OwnerId);
+            ViewData["HasAvailableUsers"] = availableUsers.Any();
         }
 
         // GET: Shop/Edit/5
@@ -142,19 +232,18 @@ namespace EasyGames.Controllers
             if (!IsOwnerOfShop(id))
                 return Forbid();
 
-            var shop = await _context.Shop.FindAsync(id);
+            var shop = await _context.Shop.Include(s => s.Owner).FirstOrDefaultAsync(s => s.ShopId == id);
             if (shop == null)
             {
                 return NotFound();
             }
-            ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)));
+
+            ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)), shop.LocationType);
             ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
             return View(shop);
         }
 
         // POST: Shop/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -172,7 +261,6 @@ namespace EasyGames.Controllers
 
             if (ModelState.IsValid)
             {
-                // Get the original shop from database
                 var originalShop = await _context.Shop.AsNoTracking().FirstOrDefaultAsync(s => s.ShopId == id);
 
                 if (originalShop == null)
@@ -180,32 +268,44 @@ namespace EasyGames.Controllers
                     return NotFound();
                 }
 
-                // Prevent changing frm Online to Physical
-                if (originalShop.LocationType == LocationTypes.Online && shop.LocationType == LocationTypes.Physical)
+                // If user is Shop Proprietor, preserve original values for restricted fields
+                if (User.IsInRole(UserRoles.ShopProprietor))
                 {
-                    ModelState.AddModelError("LocationType",
-                        "Cannot change the Online Shop to a Physical shop. The Online Shop is the main inventory source for all physical shops.");
-
-                    ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)), shop.LocationType);
-                    ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
-                    return View(shop);
+                    shop.LocationType = originalShop.LocationType;
+                    shop.Address = originalShop.Address;
+                    shop.OwnerId = originalShop.OwnerId;
+                    // Only ShopName and ContactNumber are updated
                 }
-
-                // Prevent changing to online if an online shop already exists
-                if (originalShop.LocationType == LocationTypes.Physical && shop.LocationType == LocationTypes.Online)
+                else if (User.IsInRole(UserRoles.Owner))
                 {
-                    // Check if an online shop already exists
-                    var existingOnlineShop = await _context.Shop
-                        .AnyAsync(s => s.LocationType == LocationTypes.Online && s.ShopId != id);
+                    // Owner validations for LocationType changes
 
-                    if (existingOnlineShop)
+                    // Prevent changing FROM Online to Physical
+                    if (originalShop.LocationType == LocationTypes.Online && shop.LocationType == LocationTypes.Physical)
                     {
                         ModelState.AddModelError("LocationType",
-                            "Cannot change this shop to Online. This is because an online Shop already exists. There can only be one Online Shop in the system.");
+                            "Cannot change the Online Shop to a Physical shop. The Online Shop is the main inventory source for all physical shops.");
 
                         ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)), shop.LocationType);
                         ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
                         return View(shop);
+                    }
+
+                    // Prevent changing TO Online if an online shop already exists
+                    if (originalShop.LocationType == LocationTypes.Physical && shop.LocationType == LocationTypes.Online)
+                    {
+                        var existingOnlineShop = await _context.Shop
+                            .AnyAsync(s => s.LocationType == LocationTypes.Online && s.ShopId != id);
+
+                        if (existingOnlineShop)
+                        {
+                            ModelState.AddModelError("LocationType",
+                                "Cannot change this shop to Online. An Online Shop already exists. Only one Online Shop is allowed in the system.");
+
+                            ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)), shop.LocationType);
+                            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
+                            return View(shop);
+                        }
                     }
                 }
 
@@ -234,6 +334,8 @@ namespace EasyGames.Controllers
         }
 
         // GET: Shop/Delete/5
+        // Only Owner can delete shops
+        [Authorize(Roles = UserRoles.Owner)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -256,8 +358,10 @@ namespace EasyGames.Controllers
         }
 
         // POST: Shop/Delete/5
+        // Only Owner can delete shops
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Owner)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             if (!IsOwnerOfShop(id))
