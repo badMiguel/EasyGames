@@ -42,7 +42,7 @@
                     @foreach (var item in order.OrderItems)
                     {
                         <li>
-                            <span>@item.Inventory.Item.Name</span> — <span>x@item.Quantity</span>
+                            <span>@item.Inventory.Item.Name</span> — <span>×@(item.Quantity)</span>
                         </li>
                     }
                 </ul>
