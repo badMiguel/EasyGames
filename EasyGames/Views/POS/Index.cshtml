@@ -17,6 +17,11 @@
         <div class="alert alert-success">@TempData["Success"]</div>
     }
 
+    @if (ViewBag.SuccessMessage != null)
+    {
+        <div class="alert alert-info">@ViewBag.SuccessMessage</div>
+    }
+
     <div class="pos-container">
         <!-- Inventory -->
         <div class="pos-inventory">
@@ -60,11 +65,10 @@
             <div class="cart-customer mb-3">
                 <label for="customerSearch" class="fw-semibold mb-1">Customer</label>
                 <div class="d-flex gap-2">
-                    <input type="text" id="customerSearch" class="form-control" placeholder="Search by name or email..." />
+                    <input type="text" id="customerSearch" class="form-control" placeholder="Search by email or phone number..." />
                     <button type="button" id="clearCustomer" class="btn btn-outline-secondary">Clear</button>
                 </div>
                 <ul id="customerResults" class="list-group mt-2"></ul>
-                <input type="hidden" id="selectedCustomerId" name="customerId" />
             </div>
             <div class="cart-header">
                 <h5>Current Cart</h5>
@@ -102,8 +106,12 @@
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn-clear">Clear</button>
                     </form>
-                    <form asp-action="Checkout" asp-route-shopId="@ViewBag.ShopId" method="post">
+
+                    <form asp-action="Checkout" asp-route-shopId="@ViewBag.ShopId" method="post" id="checkoutForm">
                         @Html.AntiForgeryToken()
+
+                        <input type="hidden" id="selectedCustomerId" name="customerId" />
+
                         <button type="submit" class="btn-checkout">Checkout</button>
                     </form>
                 </div>
@@ -144,13 +152,16 @@
             //  Add to Cart
             document.querySelectorAll(".add-to-cart-form").forEach(form => {
                 form.addEventListener("submit", async (e) => {
-                    e.preventDefault(); 
+                    e.preventDefault();
 
+					// Extracts form data
                     const actionUrl = form.getAttribute("action");
                     const inventoryId = form.querySelector("input[name='inventoryId']").value;
                     const quantity = form.querySelector("input[name='quantity']").value;
                     const token = form.querySelector("input[name='__RequestVerificationToken']").value;
                     const shopId = "@ViewBag.ShopId";
+
+					// Sends AJAX request
                     const response = await fetch(actionUrl, {
                         method: "POST",
                         headers: {
@@ -174,6 +185,7 @@
 
                 if (!cartList) return;
 
+				// Rebuilds cart items
                 cartList.innerHTML = "";
                 data.items.forEach(item => {
                     cartList.innerHTML += `
@@ -186,9 +198,11 @@
                         </div>`;
                 });
 
+				// Updates subtotal and item count
                 cartHeader.textContent = `${data.cartCount} item(s)`;
                 cartTotal.textContent = `Total: ${data.subtotal}`;
 
+                // Minus button
                 document.querySelectorAll(".btn-minus").forEach(btn => {
                     btn.addEventListener("click", () => {
                         const inventoryId = btn.dataset.id;
@@ -202,6 +216,7 @@
                 const shopId = "@ViewBag.ShopId";
                 const token = document.querySelector("input[name='__RequestVerificationToken']").value;
 
+                // Sends Request to remove one item from cart
                 const response = await fetch(`/Shop/${shopId}/POS/RemoveOne`, {
                     method: "POST",
                     headers: {
@@ -211,6 +226,7 @@
                     body: `inventoryId=${inventoryId}`
                 });
 
+                // Hanldes refresh and respose
                 if (!response.ok) return alert("Failed to update quantity.");
                 const data = await response.json();
                 if (data.success) updateCartUI(data);
@@ -219,9 +235,10 @@
             // Customer Search
             const searchBox = document.getElementById("customerSearch");
             const resultsList = document.getElementById("customerResults");
-            const hiddenId = document.getElementById("selectedCustomerId");
+            const hiddenId = document.querySelector("#checkoutForm #selectedCustomerId");
             const clearCustomer = document.getElementById("clearCustomer");
 
+            // Handle live search input
             searchBox.addEventListener("input", async () => {
                 const query = searchBox.value.trim();
                 if (query.length < 2) {
@@ -229,11 +246,14 @@
                     return;
                 }
 
+                // Fetch matching Customers
                 const response = await fetch(`/Shop/@ViewBag.ShopId/POS/SearchCustomer?query=${encodeURIComponent(query)}`);
                 if (!response.ok) return;
 
                 const customers = await response.json();
                 resultsList.innerHTML = "";
+
+                // Displays results
                 customers.forEach(c => {
                     const li = document.createElement("li");
                     li.className = "list-group-item list-group-item-action";
@@ -244,7 +264,9 @@
                             <span class="float-end">${c.points} pts</span>
                         </div>
                     `;
+                    // Select customer
                     li.addEventListener("click", () => {
+                        const hiddenId = document.querySelector("#checkoutForm #selectedCustomerId");
                         hiddenId.value = c.customerId;
                         searchBox.value = `${c.name} (${c.status})`;
                         resultsList.innerHTML = "";
@@ -253,6 +275,7 @@
                 });
             });
 
+            // Clear selected customer
             clearCustomer.addEventListener("click", () => {
                 searchBox.value = "";
                 hiddenId.value = "";

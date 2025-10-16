@@ -1,44 +1,95 @@
 ﻿@model EasyGames.Models.Order
 
-@{
-    ViewData["Title"] = "Receipt – " + Model.Shop?.ShopName;
-}
+<div class="receipt-container">
+    <h3>Receipt – @Model.Shop?.ShopName</h3>
 
-<h3>Receipt – @Model.Shop?.ShopName</h3>
-<p><strong>Order ID:</strong> @Model.OrderId</p>
-<p><strong>Date:</strong> @Model.OrderDate?.ToLocalTime().ToString("g")</p>
-<p><strong>Customer:</strong> @(Model.Customer?.IsGuest == true ? "Guest" : "Registered Customer")</p>
+    <!-- Order Receipt Info -->
+    <p><strong>Order ID:</strong> @Model.OrderId</p>
+    <p><strong>Date:</strong> @Model.OrderDate?.ToLocalTime().ToString("g")</p>
 
-<table class="table table-bordered mt-3">
-    <thead>
-        <tr>
-            <th>Item</th>
-            <th>Qty</th>
-            <th>Unit Price</th>
-            <th>Subtotal</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.OrderItems)
+    <div class="row mb-3">
+        <div class="col-6">
+            <p><strong>Customer:</strong> @(Model.Customer?.IsGuest == true ? "Guest" : ViewBag.CustomerName)</p>
+        </div>
+        @if (Model.Customer?.IsGuest == false)
         {
-            <tr>
-                <td>@item.Inventory?.Item?.Name</td>
-                <td>@item.Quantity</td>
-                <td>@item.UnitPrice.ToString("C")</td>
-                <td>@(item.Quantity * item.UnitPrice).ToString("C")</td>
-            </tr>
+            <div class="col-6 text-end">
+                <p class="loyalty-tier">
+                    <strong>Loyalty Status:</strong>
+                    <span class="badge @(ViewBag.Status.ToLower())">@ViewBag.Status</span>
+                    <small class="text-muted">(@ViewBag.Points pts)</small>
+                </p>
+            </div>
         }
-    </tbody>
-</table>
+    </div>
+    <!-- Customer's purchsed items table -->
+    <table class="table table-bordered receipt-table mt-3">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Line Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderItems)
+            {
+                <tr>
+                    <td>@item.Inventory?.Item?.Name</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.UnitPrice.ToString("C")</td>
+                    <td>@((item.Quantity * item.UnitPrice).ToString("C"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-@{
-    var total = Model.OrderItems.Sum(i => i.Quantity * i.UnitPrice);
-}
-<div class="d-flex justify-content-between">
-    <strong>Total:</strong>
-    <span>@total.ToString("C")</span>
+    <!-- Receipt Summary -->
+    <div class="receipt-summary">
+        <div class="d-flex">
+            <strong>Subtotal:</strong>
+            <span>@ViewBag.OriginalSubtotal.ToString("C")</span>
+        </div>
+
+        @if (ViewBag.TotalDiscountAmount > 0)
+        {
+            <div class="d-flex discount-line">
+                <strong>Discount (@(ViewBag.DiscountRate * 100)%):</strong>
+                <span>-@ViewBag.TotalDiscountAmount.ToString("C")</span>
+            </div>
+        }
+
+        <!-- Final Total -->
+        <div class="d-flex total-line">
+            <strong>Total Paid:</strong>
+            <span>@ViewBag.FinalTotalPaid.ToString("C")</span>
+        </div>
+        @if (Model.Customer?.IsGuest == false)
+        {
+            <div class="mt-2 text-muted" style="font-size:0.9rem;">
+                Points earned: <strong>@ViewBag.PointsEarned</strong> |
+                New balance: <strong>@ViewBag.CurrentBalance</strong>
+            </div>
+        }
+       
+    </div>
 </div>
-
-<div class="mt-4">
+<!-- New sale to link to POS and print receipt button -->
+<div class="receipt-actions mt-4 text-center">
     <a asp-action="Index" asp-route-shopId="@Model.ShopId" class="btn btn-primary">New Sale</a>
+    <button onclick="window.print()" class="btn btn-secondary ms-2">Print Receipt</button>
 </div>
+
+@if (Model.Customer?.IsGuest == true)
+{
+    <div class="alert alert-info text-center mt-4">
+        <p>This purchase was made as a guest.</p>
+        <p>
+            <a class="btn btn-outline-primary btn-sm"
+               href="/Identity/Account/Register?shopId=@Model.ShopId&fromPOS=true">
+                Would you like to register this guest?
+            </a>
+        </p>
+    </div>
+}

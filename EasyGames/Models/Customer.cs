@@ -10,6 +10,7 @@ public class Customer
     public ApplicationUser? User { get; set; }
 
     public bool IsGuest { get; set; }
+    public bool IsEmailConfirmed { get; set; } = false;
 
     public ICollection<Order> Orders { get; set; } = new List<Order>();
 }
