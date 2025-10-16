@@ -388,7 +388,7 @@ public class CartController : Controller
                 {
                     // Calculate subtotal and points
                     var subtotal = fullOrder!.OrderItems.Sum(oi => oi.UnitPrice * oi.Quantity);
-                    var earnedPoints = (int)Math.Floor(subtotal / 10m); // 1 point per $10
+                    var earnedPoints = (int)subtotal * 10; // 10 point per $1
 
                     if (earnedPoints > 0)
                     {
