@@ -17,6 +17,13 @@
                 <label asp-for="Input.Email">Email</label>
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
+            <div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.PhoneNumber" class="form-control" autocomplete="tel" aria-required="true" placeholder="0412345678" />
+                    <label asp-for="Input.PhoneNumber">Mobile Number</label>
+                    <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                </div>
+            </div>
             <div class="form-floating mb-3">
                 <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
                 <label asp-for="Input.Password">Password</label>

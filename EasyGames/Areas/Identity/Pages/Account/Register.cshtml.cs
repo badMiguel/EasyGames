@@ -86,6 +86,11 @@ namespace EasyGames.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
+            [Phone]
+            [Display(Name = "Mobile Number")]
+            public string PhoneNumber { get; set; }
+
+            [Required]
             [StringLength(
                 100,
                 ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.",

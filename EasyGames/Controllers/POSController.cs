@@ -124,13 +124,26 @@ namespace EasyGames.Controllers
 
             SaveCart(cart);
 
+            decimal discountRate = 0m;
+            int points = 0;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user != null)
+            {
+                points = user.AccountPoints;
+                discountRate = DiscountHelper.GetDiscountRate(points);
+            }
+
             var subtotal = cart.Sum(c => c.Quantity * c.UnitPrice);
+            var discountedSubtotal = DiscountHelper.ApplyDiscount (subtotal, points);
 
             return Json(new
             {
                 success = true,
                 cartCount = cart.Count,
-                subtotal = subtotal.ToString("C"),
+                subtotal = discountedSubtotal.ToString("C"),
+                discountApplied = discountRate > 0 ? $"{discountRate:P0}" : "None",
                 items = cart.Select(c => new
                 {
                     inventoryId = c.InventoryId,
@@ -188,7 +201,9 @@ namespace EasyGames.Controllers
 
             if (customerId.HasValue)
             {
-                customer = await _context.Customer.FindAsync(customerId.Value);
+                customer = await _context.Customer
+                    .Include(c => c.User)
+                    .FirstOrDefaultAsync(c => c.CustomerId == customerId.Value);
             }
 
             if (customer == null)
@@ -199,6 +214,15 @@ namespace EasyGames.Controllers
                 };
                 _context.Customer.Add(customer);
                 await _context.SaveChangesAsync();
+            }
+
+            decimal discountRate = 0m;
+            int points = 0;
+
+            if (customer.User != null && !customer.IsGuest)
+            {
+                points = customer.User.AccountPoints;
+                discountRate = DiscountHelper.GetDiscountRate(points);
             }
 
             var order = new Order
@@ -226,7 +250,7 @@ namespace EasyGames.Controllers
 
                 if (inventory.Quantity < item.Quantity)
                     continue;
-
+                var finalPrice = DiscountHelper.ApplyDiscount(inventory.SellPrice, points);
                 var orderItem = new OrderItem
                 {
                     OrderId = order.OrderId,
@@ -234,7 +258,7 @@ namespace EasyGames.Controllers
                     Quantity = item.Quantity,
                     UnitPrice = inventory.SellPrice,
                     UnitBuyPrice = inventory.Item.BuyPrice,
-                    DiscountPercent = item.DiscountPercent
+                    DiscountPercent = discountRate
                 };
 
                 _context.OrderItem.Add(orderItem);
@@ -246,6 +270,10 @@ namespace EasyGames.Controllers
 
 
             ClearCartSession();
+
+            TempData["Success"] = discountRate > 0
+                ? $"Checkout complete with {discountRate:P0} discount applied."
+                :"Checkout complete.";
 
             return RedirectToAction(nameof(Receipt), new { shopId = shop.ShopId, orderId = order.OrderId });
 
