@@ -70,9 +70,9 @@ public static class SeedData
             }
             else
             {
-                if (!await userManager.IsInRoleAsync(newShopProprietor, UserRoles.ShopProprietor))
+                if (!await userManager.IsInRoleAsync(shopProprietor, UserRoles.ShopProprietor))
                 {
-                    await userManager.AddToRoleAsync(newShopProprietor, UserRoles.ShopProprietor);
+                    await userManager.AddToRoleAsync(shopProprietor, UserRoles.ShopProprietor);
                 }
             }
 
@@ -82,7 +82,7 @@ public static class SeedData
                 Email = shopProprietorEmail2,
                 EmailConfirmed = true,
             };
-            if (shopProprietor == null)
+            if (shopProprietor2 == null)
             {
                 await userManager.CreateAsync(newShopProprietor2, "Shop123.");
                 await userManager.AddToRoleAsync(newShopProprietor2, UserRoles.ShopProprietor);
