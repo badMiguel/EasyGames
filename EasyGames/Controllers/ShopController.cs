@@ -98,11 +98,36 @@ namespace EasyGames.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Prevent creating a second online shop
+                if (shop.LocationType == LocationTypes.Online)
+                {
+                    var existingOnlineShop = await _context.Shop
+                        .AnyAsync(s => s.LocationType == LocationTypes.Online);
+
+                    if (existingOnlineShop)
+                    {
+                        ModelState.AddModelError("LocationType",
+                            "An Online Shop already exists. There can only be one Online Shop in the system. Please select 'Physical' location type instead.");
+
+                        ViewData["LocationType"] = new SelectList(
+                            Enum.GetValues(typeof(LocationTypes)),
+                            shop.LocationType
+                        );
+                        ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
+                        return View(shop);
+                    }
+                }
+
                 _context.Add(shop);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "Id", shop.OwnerId);
+
+            ViewData["LocationType"] = new SelectList(
+                Enum.GetValues(typeof(LocationTypes)),
+                shop.LocationType
+            );
+            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
             return View(shop);
         }
 
