@@ -29,9 +29,13 @@
         }
 
         <div class="d-flex gap-2 mt-3">
-            <a asp-action="Create" asp-route-shopId="@Model.ShopId" class="btn btn-primary">Create New</a>
+            @* Only Owner can create new inventory manually *@
+            @if (User.IsInRole(UserRoles.Owner))
+            {
+                <a asp-action="Create" asp-route-shopId="@Model.ShopId" class="btn btn-primary">Create New</a>
+            }
 
-            @* Only show Restock button if ShopId is NOT 1 (Online Shop with shop ID 1 does not need to have Restock button) *@
+            @* Only show Restock button if ShopId is NOT 1 (Online Shop) *@
             @if (Model.ShopId != 1)
             {
                 <a asp-action="Restock" asp-route-shopId="@Model.ShopId" class="btn btn-success">
@@ -83,7 +87,7 @@
                     <div class="card border-0 bg-light p-3 mb-0">
                         <div class="card-body text-center">
                             <div class="h5 mb-1">No inventory items</div>
-                            <p class="mb-0 text-muted">Use <strong>Create New</strong> to add the first item.</p>
+                            <p class="mb-0 text-muted">Use <strong>Restock from Owner</strong> to add items.</p>
                         </div>
                     </div>
                 </td>
@@ -112,7 +116,12 @@
                     <td class="text-end">
                         <a class="btn btn-sm btn-outline-primary" asp-route-shopId="@Model.ShopId" asp-action="Edit" asp-route-id="@item.InventoryId">Edit</a>
                         <a class="btn btn-sm btn-outline-info" asp-route-shopId="@Model.ShopId" asp-action="Details" asp-route-id="@item.InventoryId">Details</a>
-                        <a class="btn btn-sm btn-outline-danger" asp-route-shopId="@Model.ShopId" asp-action="Delete" asp-route-id="@item.InventoryId">Delete</a>
+
+                        @* Only Owner can delete inventory *@
+                        @if (User.IsInRole(UserRoles.Owner))
+                        {
+                            <a class="btn btn-sm btn-outline-danger" asp-route-shopId="@Model.ShopId" asp-action="Delete" asp-route-id="@item.InventoryId">Delete</a>
+                        }
                     </td>
                 </tr>
             }

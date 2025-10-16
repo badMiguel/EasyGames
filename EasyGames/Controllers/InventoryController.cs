@@ -171,7 +171,9 @@ namespace EasyGames.Controllers
         }
 
         // GET: Inventory/Create
+        // Authorize Owner only
         [HttpGet("Create")]
+        [Authorize(Roles = UserRoles.Owner)]
         public IActionResult Create([FromRoute] int shopId)
         {
             if (!IsOwnerOfShop(shopId))
@@ -185,10 +187,10 @@ namespace EasyGames.Controllers
         }
 
         // POST: Inventory/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // ADDED: Authorize Owner only
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Owner)]
         public async Task<IActionResult> Create(
             [Bind("InventoryId,ShopId,ItemId,SellPrice,Quantity")] Inventory inventory
         )
@@ -282,8 +284,6 @@ namespace EasyGames.Controllers
         }
 
         // POST: Inventory/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("Edit/{id:int}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -336,7 +336,15 @@ namespace EasyGames.Controllers
                 {
                     oldInventory.ItemId = inventory.ItemId;
                     oldInventory.ShopId = inventory.ShopId;
-                    oldInventory.Quantity = inventory.Quantity;
+
+                    // Only Owner can edit quantity
+                    // Shop proprietors can only edit sell price
+                    if (User.IsInRole(UserRoles.Owner))
+                    {
+                        oldInventory.Quantity = inventory.Quantity;
+                    }
+                    // If shop proprietor, keep original quantity (don't update)
+
                     oldInventory.SellPrice = inventory.SellPrice;
                     await _context.SaveChangesAsync();
                 }
@@ -369,7 +377,9 @@ namespace EasyGames.Controllers
         }
 
         // GET: Inventory/Delete/5
+        // Authorize Owner only
         [HttpGet("Delete/{id:int}")]
+        [Authorize(Roles = UserRoles.Owner)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -393,8 +403,10 @@ namespace EasyGames.Controllers
         }
 
         // POST: Inventory/Delete/5
+        // Authorize Owner only
         [HttpPost("Delete/{id:int}"), ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = UserRoles.Owner)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var inventory = await _context.Inventory.FindAsync(id);
