@@ -69,6 +69,7 @@
                     <button type="button" id="clearCustomer" class="btn btn-outline-secondary">Clear</button>
                 </div>
                 <ul id="customerResults" class="list-group mt-2"></ul>
+				<input type="hidden" id="selectedUserId" name="userId" />
             </div>
             <div class="cart-header">
                 <h5>Current Cart</h5>
@@ -109,9 +110,7 @@
 
                     <form asp-action="Checkout" asp-route-shopId="@ViewBag.ShopId" method="post" id="checkoutForm">
                         @Html.AntiForgeryToken()
-
-                        <input type="hidden" id="selectedCustomerId" name="customerId" />
-
+                        <input type="hidden" id="selectedCustomerId" name="userId" />
                         <button type="submit" class="btn-checkout">Checkout</button>
                     </form>
                 </div>
@@ -121,6 +120,16 @@
 </div>
 
 @section Scripts {
+
+    <!-- ChatGPT prompt 005 
+    Create a Javascript code for the POS system which has the following features:a
+    - category and search filtering
+	- AJAX-based add to cart and quantity update
+    - live registered customer search
+    - dynamic UI cart updates
+    -->
+
+
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             // Category Filter
@@ -232,55 +241,72 @@
                 if (data.success) updateCartUI(data);
             }
 
-            // Customer Search
-            const searchBox = document.getElementById("customerSearch");
-            const resultsList = document.getElementById("customerResults");
-            const hiddenId = document.querySelector("#checkoutForm #selectedCustomerId");
-            const clearCustomer = document.getElementById("clearCustomer");
+        // Customer Search
+        const searchBox = document.getElementById("customerSearch");
+        const resultsList = document.getElementById("customerResults");
+        const hiddenUserId = document.querySelector("#checkoutForm #selectedCustomerId"); 
+        const clearCustomer = document.getElementById("clearCustomer");
 
-            // Handle live search input
-            searchBox.addEventListener("input", async () => {
-                const query = searchBox.value.trim();
-                if (query.length < 2) {
-                    resultsList.innerHTML = "";
-                    return;
-                }
+        // Handle live search input
+        searchBox.addEventListener("input", async () => {
+            const query = searchBox.value.trim();
+            if (query.length < 2) {
+                resultsList.innerHTML = "";
+                return;
+            }
 
-                // Fetch matching Customers
+            try {
+                // Fetch matching registered customers
                 const response = await fetch(`/Shop/@ViewBag.ShopId/POS/SearchCustomer?query=${encodeURIComponent(query)}`);
-                if (!response.ok) return;
+                if (!response.ok) throw new Error("Network response was not ok");
 
                 const customers = await response.json();
                 resultsList.innerHTML = "";
 
-                // Displays results
+                if (!customers.length) {
+                    resultsList.innerHTML = `<li class="list-group-item text-muted">No matching customers found.</li>`;
+                    return;
+                }
+
+                // Display search results
                 customers.forEach(c => {
                     const li = document.createElement("li");
                     li.className = "list-group-item list-group-item-action";
                     li.innerHTML = `
-                        <div><strong>${c.name}</strong> <span class="text-muted small">(${c.status})</span></div>
+                        <div>
+                            <strong>${c.name}</strong>
+                            <span class="text-muted small">(${c.status})</span>
+                        </div>
                         <div class="small text-muted">
                             ${c.email ?? ""} ${c.phone ?? ""}
-                            <span class="float-end">${c.points} pts</span>
+                            <span class="float-end">${c.points ?? 0} pts</span>
                         </div>
                     `;
+
                     // Select customer
                     li.addEventListener("click", () => {
-                        const hiddenId = document.querySelector("#checkoutForm #selectedCustomerId");
-                        hiddenId.value = c.customerId;
+                        hiddenUserId.value = c.userId;
                         searchBox.value = `${c.name} (${c.status})`;
                         resultsList.innerHTML = "";
+                        console.log("Selected userId:", c.userId);
                     });
+
                     resultsList.appendChild(li);
                 });
-            });
+            } catch (error) {
+                console.error("Customer search failed:", error);
+            }
+        });
 
-            // Clear selected customer
-            clearCustomer.addEventListener("click", () => {
-                searchBox.value = "";
-                hiddenId.value = "";
-                resultsList.innerHTML = "";
-            });
+        // Clear selected customer
+        clearCustomer.addEventListener("click", () => {
+            searchBox.value = "";
+            hiddenUserId.value = "";
+            resultsList.innerHTML = "";
+        });
+
+
+          //ChatGPT prompt 005 end
         });
     </script>
 }

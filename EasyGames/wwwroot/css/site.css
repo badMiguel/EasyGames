@@ -35,6 +35,15 @@ body {
     margin-top: 0; 
 }
 
+
+
+/*ChatGPT Prompt 006 Start
+
+    Task:Create CSS for a modern POS or Point of Sale system interface. 
+    The inventory should be on the right and the cart panel should be on the left. 
+    The search icon for registered customers should also be on top of the cart panel
+    Also include the categories as buttons above the inventory section and another search bar for the items on top.
+*/
 /* POS Styling */
 .pos-wrapper {
     display: flex;
@@ -298,7 +307,14 @@ body {
         #customerResults li:hover {
             background-color: #f9f9f9;
         }
+/* ChatGPT Prompt 006 end */
 
+
+
+/* ChatGPT Prompt 007 start
+   Task: Create CSS for the receipt page of the POS system. 
+    The receipt should be clean and professional, with clear sections for items, totals, and customer information.
+*/
 /* Button Styles */
 .btn-clear {
     background: #eee;
@@ -520,3 +536,5 @@ body {
         border: 1px solid #999;
     }
 }
+
+/* ChatGPT Prompt 007 end */

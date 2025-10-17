@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
+using EasyGames.Data;
 using EasyGames.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -18,7 +19,9 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SQLitePCL;
 
 namespace EasyGames.Areas.Identity.Pages.Account
 {
@@ -133,11 +136,26 @@ namespace EasyGames.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                user.PhoneNumber = Input.PhoneNumber;
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+                    await _userManager.AddToRoleAsync(user, UserRoles.Customer);
+                    using (var scope = HttpContext.RequestServices.CreateScope())
+                    {
+                        var context = scope.ServiceProvider.GetRequiredService<EasyGamesContext>();
+                        var newCustomer = new Customer
+
+                        {
+                            UserId = user.Id,
+                            IsGuest = false,
+                            IsEmailConfirmed = false,
+                        };
+                        context.Customer.Add(newCustomer);
+                        await context.SaveChangesAsync();
+                    }
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -153,7 +171,7 @@ namespace EasyGames.Areas.Identity.Pages.Account
                             returnUrl = returnUrl,
                         },
                         protocol: Request.Scheme
-                    );
+                        );
 
                     await _emailService.SendEmailAsync(
                         Input.Email,
