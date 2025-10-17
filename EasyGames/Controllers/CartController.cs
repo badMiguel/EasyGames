@@ -287,19 +287,29 @@ public class CartController : Controller
 
     public async Task<IActionResult> ViewCart()
     {
-        bool isLoggedIn = User.Identity?.IsAuthenticated ?? false;
-
-        if (!isLoggedIn)
+        // Guests are allowed; do NOT force login here.
+        int orderId = await GetUserOrderId(); // will create/find a guest cart via session
+        if (orderId <= 0)
         {
-            return RedirectToPage("/Account/Login", new { area = "Identity" });
+            // Nothing in cart yet; show empty cart view gracefully
+            ViewData["OrderId"] = -1;
+            ViewData["OrderItemError"] = TempData["OrderItemError"];
+            return View(new List<OrderItem>());
         }
 
-        int orderId = await GetUserOrderId();
         var orderItems = GetOrderedItems(orderId);
         ViewData["OrderId"] = orderId;
         ViewData["OrderItemError"] = TempData["OrderItemError"];
+
+        // show a gentle note for guests
+        if (!(User.Identity?.IsAuthenticated ?? false))
+        {
+            ViewData["GuestNote"] = "You’re checking out as a guest. Points and tier discounts do not apply.";
+        }
+
         return View(orderItems);
     }
+
 
     private List<OrderItem> GetOrderedItems(int orderId)
     {

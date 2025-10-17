@@ -1,3 +1,5 @@
+// Used ChatGPT to generate this code
+
 using System.Runtime.InteropServices.Marshalling;
 using System.Text.Encodings.Web;
 using EasyGames.Data;
