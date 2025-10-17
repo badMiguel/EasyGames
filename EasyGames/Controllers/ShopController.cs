@@ -79,7 +79,6 @@ namespace EasyGames.Controllers
         }
 
         // GET: Shop/Create
-        // ADDED: Only Owner can create shops
         [Authorize(Roles = UserRoles.Owner)]
         public async Task<IActionResult> Create()
         {
@@ -88,11 +87,11 @@ namespace EasyGames.Controllers
                 LocationTypes.Physical
             );
 
-            // Get users who don't already own a shop AND have Owner or ShopProprietor role
+            // Get shop proprietors who don't already own a shop
             var usersWithShops = _context.Shop.Select(s => s.OwnerId).ToList();
             var allUsers = await _context.Users.ToListAsync();
 
-            var availableUsers = new List<object>();
+            var availableProprietors = new List<object>();
 
             foreach (var user in allUsers)
             {
@@ -107,14 +106,15 @@ namespace EasyGames.Controllers
                         (ur, r) => r.Name)
                     .ToListAsync();
 
-                if (roles.Contains(UserRoles.Owner) || roles.Contains(UserRoles.ShopProprietor))
+                // ONLY ShopProprietor role (physical shops are for proprietors)
+                if (roles.Contains(UserRoles.ShopProprietor))
                 {
-                    availableUsers.Add(new { user.Id, user.UserName });
+                    availableProprietors.Add(new { user.Id, user.UserName });
                 }
             }
 
-            ViewData["OwnerId"] = new SelectList(availableUsers, "Id", "UserName");
-            ViewData["HasAvailableUsers"] = availableUsers.Any();
+            ViewData["OwnerId"] = new SelectList(availableProprietors, "Id", "UserName");
+            ViewData["HasAvailableUsers"] = availableProprietors.Any();
 
             return View();
         }
@@ -192,7 +192,7 @@ namespace EasyGames.Controllers
             var usersWithShops = _context.Shop.Select(s => s.OwnerId).ToList();
             var allUsers = await _context.Users.ToListAsync();
 
-            var availableUsers = new List<object>();
+            var availableProprietors = new List<object>();
 
             foreach (var user in allUsers)
             {
@@ -207,9 +207,10 @@ namespace EasyGames.Controllers
                         (ur, r) => r.Name)
                     .ToListAsync();
 
-                if (roles.Contains(UserRoles.Owner) || roles.Contains(UserRoles.ShopProprietor))
+                // Only ShopProprietor role
+                if (roles.Contains(UserRoles.ShopProprietor))
                 {
-                    availableUsers.Add(new { user.Id, user.UserName });
+                    availableProprietors.Add(new { user.Id, user.UserName });
                 }
             }
 
@@ -217,8 +218,8 @@ namespace EasyGames.Controllers
                 Enum.GetValues(typeof(LocationTypes)),
                 shop.LocationType
             );
-            ViewData["OwnerId"] = new SelectList(availableUsers, "Id", "UserName", shop.OwnerId);
-            ViewData["HasAvailableUsers"] = availableUsers.Any();
+            ViewData["OwnerId"] = new SelectList(availableProprietors, "Id", "UserName", shop.OwnerId);
+            ViewData["HasAvailableUsers"] = availableProprietors.Any();
         }
 
         // GET: Shop/Edit/5
@@ -239,7 +240,29 @@ namespace EasyGames.Controllers
             }
 
             ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)), shop.LocationType);
-            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", shop.OwnerId);
+
+            // only show ShopProprietor role (not Owner, not Customers)
+            var allUsers = await _context.Users.ToListAsync();
+            var shopProprietors = new List<object>();
+
+            foreach (var user in allUsers)
+            {
+                var roles = await _context.UserRoles
+                    .Where(ur => ur.UserId == user.Id)
+                    .Join(_context.Roles,
+                        ur => ur.RoleId,
+                        r => r.Id,
+                        (ur, r) => r.Name)
+                    .ToListAsync();
+
+                // only ShopProprietor role (physical shops are for proprietors)
+                if (roles.Contains(UserRoles.ShopProprietor))
+                {
+                    shopProprietors.Add(new { user.Id, user.UserName });
+                }
+            }
+
+            ViewData["OwnerId"] = new SelectList(shopProprietors, "Id", "UserName", shop.OwnerId);
             return View(shop);
         }
 

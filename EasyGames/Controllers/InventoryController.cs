@@ -259,7 +259,11 @@ namespace EasyGames.Controllers
                 return NotFound();
             }
 
-            var inventory = await _context.Inventory.FindAsync(id);
+            // Include Item navigation property so shop proprietors can see the item name
+            var inventory = await _context.Inventory
+                .Include(i => i.Item)
+                .FirstOrDefaultAsync(i => i.InventoryId == id);
+
             if (inventory == null)
             {
                 return NotFound();

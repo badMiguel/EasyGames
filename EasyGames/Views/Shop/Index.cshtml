@@ -58,7 +58,7 @@
                 continue;
             }
 
-            @* Shop Proprietor sees only their shop with limited controls *@
+            @* Shop Proprietor sees only their shop - VIEW ONLY with POS and Inventory access *@
             if (User.FindFirst(ClaimTypes.NameIdentifier)?.Value == item.OwnerId)
             {
                 <tr>
@@ -73,10 +73,8 @@
                     </td>
                     <td>
                         <a asp-controller="POS" asp-action="Index" asp-route-shopId="@item.ShopId">POS</a> |
-                        <a asp-controller="Inventory" asp-action="Index" asp-route-shopId="@item.ShopId">View Inventory</a> |
-                        <a asp-action="Edit" asp-route-id="@item.ShopId">Edit</a> |
-                        <a asp-action="Details" asp-route-id="@item.ShopId">Details</a>
-                        @* Removed Delete link for Shop Proprietor *@
+                        <a asp-controller="Inventory" asp-action="Index" asp-route-shopId="@item.ShopId">View Inventory</a>
+                        @* Per requirements: Shop proprietors can only view shop, restock inventory, and use POS *@
                     </td>
                 </tr>
             }

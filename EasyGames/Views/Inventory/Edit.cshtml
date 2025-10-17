@@ -13,21 +13,52 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="InventoryId" />
-            <div class="form-group">
-                <label asp-for="ShopId" class="control-label">Shop</label>
-                <select asp-for="ShopId" class="form-control" asp-items="ViewBag.ShopIdList"></select>
-                <span asp-validation-for="ShopId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ItemId" class="control-label">Item</label>
-                <select asp-for="ItemId" class="form-control" asp-items="ViewBag.ItemIdList"></select>
-                <span asp-validation-for="ItemId" class="text-danger"></span>
-            </div>
+
+            @* Shop Selection, Only Owner can change this *@
+            @if (User.IsInRole(UserRoles.Owner))
+            {
+                <div class="form-group">
+                    <label asp-for="ShopId" class="control-label">Shop</label>
+                    <select asp-for="ShopId" class="form-control" asp-items="ViewBag.ShopIdList"></select>
+                    <span asp-validation-for="ShopId" class="text-danger"></span>
+                </div>
+            }
+            else
+            {
+                @* Shop Proprietor - hide ShopId dropdown, keep value as hidden *@
+                <input type="hidden" asp-for="ShopId" />
+            }
+
+            @* Item Selection - Only Owner can change this *@
+            @if (User.IsInRole(UserRoles.Owner))
+            {
+                <div class="form-group">
+                    <label asp-for="ItemId" class="control-label">Item</label>
+                    <select asp-for="ItemId" class="form-control" asp-items="ViewBag.ItemIdList"></select>
+                    <span asp-validation-for="ItemId" class="text-danger"></span>
+                </div>
+            }
+            else
+            {
+                @* Shop Proprietor, show readonly, keep value as hidden *@
+                <input type="hidden" asp-for="ItemId" />
+                <div class="form-group">
+                    <label class="control-label">Item</label>
+                    <input type="text" class="form-control" value="@Model.Item?.Name" readonly />
+                    <small class="form-text text-muted">
+                        <i class="fa-solid fa-lock"></i> Only the owner can change this field.
+                    </small>
+                </div>
+            }
+
+            @* Sell Price, both can edit *@
             <div class="form-group">
                 <label asp-for="SellPrice" class="control-label"></label>
                 <input asp-for="SellPrice" class="form-control" />
                 <span asp-validation-for="SellPrice" class="text-danger"></span>
             </div>
+
+            @* Quantity, only Owner can edit *@
             <div class="form-group">
                 <label asp-for="Quantity" class="control-label"></label>
                 @if (User.IsInRole(UserRoles.Owner))
@@ -43,6 +74,7 @@
                 }
                 <span asp-validation-for="Quantity" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
