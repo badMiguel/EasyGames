@@ -171,7 +171,7 @@ namespace EasyGames.Controllers
         }
 
         // GET: Inventory/Create
-        // Authorize Owner only
+        // Authorise Owner only
         [HttpGet("Create")]
         [Authorize(Roles = UserRoles.Owner)]
         public IActionResult Create([FromRoute] int shopId)
@@ -187,7 +187,7 @@ namespace EasyGames.Controllers
         }
 
         // POST: Inventory/Create
-        // ADDED: Authorize Owner only
+        // Authorise Owner only
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = UserRoles.Owner)]
@@ -347,7 +347,7 @@ namespace EasyGames.Controllers
                     {
                         oldInventory.Quantity = inventory.Quantity;
                     }
-                    // If shop proprietor, keep original quantity (don't update)
+                    // If shop proprietor, keep original quantity 
 
                     oldInventory.SellPrice = inventory.SellPrice;
                     await _context.SaveChangesAsync();
@@ -381,7 +381,7 @@ namespace EasyGames.Controllers
         }
 
         // GET: Inventory/Delete/5
-        // Authorize Owner only
+        // Authorise Owner only
         [HttpGet("Delete/{id:int}")]
         [Authorize(Roles = UserRoles.Owner)]
         public async Task<IActionResult> Delete(int? id)
@@ -407,7 +407,7 @@ namespace EasyGames.Controllers
         }
 
         // POST: Inventory/Delete/5
-        // Authorize Owner only
+        // Authorise Owner only
         [HttpPost("Delete/{id:int}"), ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = UserRoles.Owner)]
@@ -446,7 +446,7 @@ namespace EasyGames.Controllers
                 return RedirectToAction(nameof(Index), new { shopId });
             }
 
-            // Get the online shop (owner's main inventory)
+            // Get the online shop 
             var onlineShop = await _context.Shop
                 .FirstOrDefaultAsync(s => s.LocationType == LocationTypes.Online);
 
@@ -487,7 +487,7 @@ namespace EasyGames.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restock(int shopId, int onlineInventoryId, int quantity)
         {
-            // Authorization check
+            // Authorisation check
             if (!IsOwnerOfShop(shopId))
                 return Forbid();
 
@@ -538,18 +538,18 @@ namespace EasyGames.Controllers
 
             if (physicalInventory != null)
             {
-                // Item exists - Add to existing quantity
+                // Item exists then add to existing quantity
                 physicalInventory.Quantity += quantity;
             }
             else
             {
-                // Item doesn't exist - Create new inventory record
+                // Item doesn't exist then create new inventory record
                 // Inherit sell price from online shop
                 physicalInventory = new Inventory
                 {
                     ShopId = shopId,
                     ItemId = onlineInventory.ItemId,
-                    SellPrice = onlineInventory.SellPrice, // Auto-inherit price
+                    SellPrice = onlineInventory.SellPrice, // Auto inherit price
                     Quantity = quantity
                 };
                 _context.Inventory.Add(physicalInventory);

@@ -35,7 +35,7 @@
                 <a asp-action="Create" asp-route-shopId="@Model.ShopId" class="btn btn-primary">Create New</a>
             }
 
-            @* Only show Restock button if ShopId is NOT 1 (Online Shop) *@
+            @* Only show Restock button if ShopId is not 1 since online shop does not need the restock functionality *@
             @if (Model.ShopId != 1)
             {
                 <a asp-action="Restock" asp-route-shopId="@Model.ShopId" class="btn btn-success">

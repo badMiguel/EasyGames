@@ -106,7 +106,7 @@ namespace EasyGames.Controllers
                         (ur, r) => r.Name)
                     .ToListAsync();
 
-                // ONLY ShopProprietor role (physical shops are for proprietors)
+                // only ShopProprietor role (physical shops are for proprietors)
                 if (roles.Contains(UserRoles.ShopProprietor))
                 {
                     availableProprietors.Add(new { user.Id, user.UserName });
@@ -120,7 +120,7 @@ namespace EasyGames.Controllers
         }
 
         // POST: Shop/Create
-        // ADDED: Only Owner can create shops
+        // Ensure that only Owner can create shops
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = UserRoles.Owner)]
@@ -161,7 +161,7 @@ namespace EasyGames.Controllers
                     return View(shop);
                 }
 
-                // VALIDATION 3: Prevent creating a second online shop
+                // Prevent creating a second online shop
                 if (shop.LocationType == LocationTypes.Online)
                 {
                     var existingOnlineShop = await _context.Shop
@@ -241,7 +241,7 @@ namespace EasyGames.Controllers
 
             ViewData["LocationType"] = new SelectList(Enum.GetValues(typeof(LocationTypes)), shop.LocationType);
 
-            // only show ShopProprietor role (not Owner, not Customers)
+            // only show ShopProprietor role 
             var allUsers = await _context.Users.ToListAsync();
             var shopProprietors = new List<object>();
 
@@ -255,7 +255,7 @@ namespace EasyGames.Controllers
                         (ur, r) => r.Name)
                     .ToListAsync();
 
-                // only ShopProprietor role (physical shops are for proprietors)
+                // only ShopProprietor role 
                 if (roles.Contains(UserRoles.ShopProprietor))
                 {
                     shopProprietors.Add(new { user.Id, user.UserName });
@@ -314,7 +314,7 @@ namespace EasyGames.Controllers
                         return View(shop);
                     }
 
-                    // Prevent changing TO Online if an online shop already exists
+                    // Prevent changing to Online if an online shop already exists
                     if (originalShop.LocationType == LocationTypes.Physical && shop.LocationType == LocationTypes.Online)
                     {
                         var existingOnlineShop = await _context.Shop
@@ -357,7 +357,7 @@ namespace EasyGames.Controllers
         }
 
         // GET: Shop/Delete/5
-        // Only Owner can delete shops
+        // Ensure that only Owner can delete shops
         [Authorize(Roles = UserRoles.Owner)]
         public async Task<IActionResult> Delete(int? id)
         {
@@ -381,7 +381,7 @@ namespace EasyGames.Controllers
         }
 
         // POST: Shop/Delete/5
-        // Only Owner can delete shops
+        // Ensure that only owner can delete shops
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = UserRoles.Owner)]
