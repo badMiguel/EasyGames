@@ -30,7 +30,7 @@ namespace EasyGames.Controllers
             var shop = await _context.Shop.AsNoTracking().FirstOrDefaultAsync(s => s.ShopId == shopId);
             return shop?.OwnerId == userId;
         }
-        //ChatGPT Prompt 001 start
+        //ChatGPT Prompt 002 start
         //Explain and implement session-based cart management for the POS system using ASP.NET Core session storage
 
         #region CartSessionHelpers
@@ -55,7 +55,7 @@ namespace EasyGames.Controllers
             HttpContext.Session.Remove("PosCart");
         }
         #endregion
-        // ChatGPT Prompt 001 end
+        // ChatGPT Prompt 002 end
 
 
         // GET: Shop/{shopId}/POS
@@ -100,7 +100,7 @@ namespace EasyGames.Controllers
             return View(inventoryList);
         }
 
-        // ChatGPT Prompt 002 start
+        // ChatGPT Prompt 003 start
         // Can you implement an AJAX based method to add items to the POS cart?
         // Ensure that the checkout process to create an order, calculate discounts based on customer points , and update inventory stock is also included.
         // Add helper logic for clearing cart after checkout and awarding points to customers based on their purchases.
@@ -329,11 +329,11 @@ namespace EasyGames.Controllers
             return RedirectToAction(nameof(Receipt), new { shopId = shop.ShopId, orderId = order.OrderId });
         }
 
-        // ChatGPT Prompt 002 end
+        // ChatGPT Prompt 003 end
 
 
-        // ChatGPT Prompt 003 start
-        // Can you add a minus button to reduce the quantity of an item in the POS cart using AJAX?
+        // ChatGPT Prompt 004 start
+        // Can you explainhow I can add a minus button to reduce the quantity of an item in the POS cart using AJAX?
         // AJAX: Remove one quantity of an item from the cart
         [HttpPost("RemoveOne")]
         [ValidateAntiForgeryToken]
@@ -377,7 +377,7 @@ namespace EasyGames.Controllers
             });
         }
 
-        // ChatGPT Prompt 003 end
+        // ChatGPT Prompt 004  end
         // AJAX search for customer
         [HttpGet("SearchCustomer")]
         public async Task<IActionResult> SearchCustomer(string query)
@@ -425,7 +425,7 @@ namespace EasyGames.Controllers
         }
 
 
-        // ChatGPT Prompt 004 start
+        // ChatGPT Prompt 005 start
         // I want to implement an AJAX method so that I can get the customer discount details when a customer is selected in the search bar above the cart.
         // This should include their name, email, phone number, current points, status tier, and applicable discount rate.
 
@@ -520,7 +520,7 @@ namespace EasyGames.Controllers
         }
 
 
-        // ChatGPT Prompt 004 end
+        // ChatGPT Prompt 005 end
 
     }
 }
