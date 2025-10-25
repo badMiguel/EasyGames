@@ -483,6 +483,8 @@ namespace EasyGames.Controllers
         }
 
         // POST: Shop/{shopId}/Inventory/Restock
+        // Reference: Stock transfer logic implementation assisted by Claude AI (Anthropic)
+        // Claude AI Prompt 001 start
         [HttpPost("Restock")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Restock(int shopId, int onlineInventoryId, int quantity)
@@ -564,6 +566,7 @@ namespace EasyGames.Controllers
             TempData["Success"] = $"Successfully restocked {quantity} units of '{onlineInventory.Item.Name}' from online shop.";
             return RedirectToAction(nameof(Index), new { shopId });
         }
+        // Claude AI Prompt 001 End
 
         private bool InventoryExists(int id)
         {

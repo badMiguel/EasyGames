@@ -106,7 +106,7 @@ namespace EasyGames.Controllers
                         (ur, r) => r.Name)
                     .ToListAsync();
 
-                // only ShopProprietor role (physical shops are for proprietors)
+                // only ShopProprietor role 
                 if (roles.Contains(UserRoles.ShopProprietor))
                 {
                     availableProprietors.Add(new { user.Id, user.UserName });
