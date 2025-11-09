@@ -2,6 +2,13 @@
 
 HIT339 Assignment 2
 
+Demo link [here](https://easygames.badmiguel.com).
+
+> [!NOTE]
+> This demo is fully read-only — all CRUD functionalities and user authentication
+> have been removed. It is intended solely for showcasing the interface and layout,
+> with no ability to modify or persist data.
+
 ---
 
 # User Credentials
